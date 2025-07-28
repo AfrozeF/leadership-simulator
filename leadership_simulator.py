@@ -64,7 +64,7 @@ st.markdown("""
         }
         
         .ai-message::before {
-            content: "🧭 Journey Coach";
+            content: "Leadership Coach";
             position: absolute;
             top: -8px;
             left: 1rem;
@@ -272,6 +272,24 @@ st.markdown("""
             text-align: center;
         }
         
+        .case-study {
+            background: var(--surface);
+            border: 1px solid var(--accent-primary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            color: var(--text-primary);
+        }
+        
+        .case-study-header {
+            color: var(--accent-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--accent-primary);
+            padding-bottom: 0.5rem;
+        }
+        
         /* Override Streamlit default styles */
         .stTextInput > div > div > input {
             background-color: var(--card-bg) !important;
@@ -439,27 +457,27 @@ if 'app_started' not in st.session_state:
 def render_sidebar():
     with st.sidebar:
         st.markdown('<div class="sidebar-content">', unsafe_allow_html=True)
-        st.markdown('<h2 class="sidebar-title">🧭 Leadership Path</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="sidebar-title">Leadership Assessment Progress</h2>', unsafe_allow_html=True)
         
         if st.session_state.app_started:
             # Points Display
             st.markdown(f"""
             <div class="points-display">
-                ⭐ Journey Points<br>
+                Assessment Points<br>
                 <span style="font-size: 1.8rem;">{st.session_state.total_points}</span>
             </div>
             """, unsafe_allow_html=True)
             
             # Scenario Progress
-            st.markdown("**Journey Steps**")
+            st.markdown("**Assessment Progress**")
             for i in range(5):
                 if i < len(st.session_state.responses):
                     points = st.session_state.scenario_points[i] if i < len(st.session_state.scenario_points) else 0
-                    st.markdown(f'<div class="scenario-pill scenario-completed">Step {i+1} ✓ (+{points}pts)</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="scenario-pill scenario-completed">Scenario {i+1} Complete (+{points}pts)</div>', unsafe_allow_html=True)
                 elif i == st.session_state.current_scenario:
-                    st.markdown(f'<div class="scenario-pill scenario-current">Step {i+1} 🔄</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="scenario-pill scenario-current">Scenario {i+1} Active</div>', unsafe_allow_html=True)
                 else:
-                    st.markdown(f'<div class="scenario-pill scenario-pending">Step {i+1}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="scenario-pill scenario-pending">Scenario {i+1} Pending</div>', unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             
@@ -491,7 +509,7 @@ def render_sidebar():
 def show_typing_effect():
     return st.markdown("""
     <div class="typing-indicator">
-        Journey AI is thinking
+        AI Coach is analyzing
         <div class="typing-dots">
             <span></span>
             <span></span>
@@ -512,9 +530,9 @@ if not st.session_state.app_started:
     
     st.markdown(f"""
     <div class="welcome-header">
-        <h1>🧭 Leadership Journey AI</h1>
+        <h1>Leadership Style Assessment</h1>
         <p style="font-size: 1.2rem; opacity: 0.9; margin: 0;">
-            Your Personal AI Leadership Coach
+            Professional Leadership Development Platform
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -527,11 +545,11 @@ if not st.session_state.app_started:
     </div>
     """, unsafe_allow_html=True)
     
-    name = st.text_input("", placeholder="What's your name? Let's begin your leadership journey! 🚀", key="name_input")
+    name = st.text_input("", placeholder="Enter your name to begin the leadership assessment", key="name_input")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Begin Leadership Journey", key="start_btn", use_container_width=True):
+        if st.button("Begin Assessment", key="start_btn", use_container_width=True):
             if name.strip():
                 st.session_state.user_name = name.strip()
                 st.session_state.app_started = True
@@ -549,24 +567,37 @@ elif st.session_state.current_scenario < len(scenarios):
     # Chat Header
     col1, col2 = st.columns([8, 2])
     with col1:
-        st.markdown(f"### 🧭 Leadership Journey AI - Scenario {st.session_state.current_scenario + 1}")
+        st.markdown(f"### Leadership Assessment - Scenario {st.session_state.current_scenario + 1}")
     with col2:
-        if st.button("🔄 Restart", key="restart"):
+        if st.button("Restart Assessment", key="restart"):
             restart_app()
     
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     
+    # Case Study
+    case_study = educational_content['case_studies'][st.session_state.current_scenario]
+    st.markdown(f"""
+    <div class="case-study">
+        <div class="case-study-header">{case_study['title']}</div>
+        <p><strong>Case Study:</strong> {case_study['company']}</p>
+        <p><strong>Situation:</strong> {case_study['situation']}</p>
+        <p><strong>Leadership Approach:</strong> {case_study['leadership_approach']}</p>
+        <p><strong>Outcome:</strong> {case_study['outcome']}</p>
+        <p><strong>Key Lesson:</strong> {case_study['lesson']}</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     # Previous conversation if any
     if st.session_state.current_scenario > 0:
-        st.markdown(f'<div class="user-choice">Previous choice: {st.session_state.responses[-1]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="user-choice">Previous selection: {st.session_state.responses[-1]}</div>', unsafe_allow_html=True)
     
     # AI Introduction
-    greeting = f"Hi {st.session_state.user_name}! " if st.session_state.current_scenario == 0 else ""
+    greeting = f"Welcome {st.session_state.user_name}. " if st.session_state.current_scenario == 0 else ""
     st.markdown(f"""
     <div class="ai-message">
         {greeting}{scenario_data['ai_intro']}
         
-        <br><br><strong>The Scenario:</strong><br>
+        <br><br><strong>Your Scenario:</strong><br>
         <em>{scenario_data['context']}</em>
         
         <br><br>{scenario_data['ai_question']}
@@ -585,7 +616,7 @@ elif st.session_state.current_scenario < len(scenarios):
         </div>
         """, unsafe_allow_html=True)
         
-        if st.button(f"Choose {style}", key=f"{style}_{i}", use_container_width=True):
+        if st.button(f"Select {style}", key=f"{style}_{i}", use_container_width=True):
             # Add points and response
             points_earned = leadership_styles[style]['points']
             st.session_state.last_choice = style
@@ -601,7 +632,7 @@ elif st.session_state.current_scenario < len(scenarios):
         style_info = leadership_styles[chosen_style]
         points_earned = st.session_state.scenario_points[-1]
         
-        st.markdown(f'<div class="user-choice">You chose: {chosen_style}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="user-choice">You selected: {chosen_style}</div>', unsafe_allow_html=True)
         
         # Typing effect
         with st.empty():
@@ -610,13 +641,13 @@ elif st.session_state.current_scenario < len(scenarios):
             
             st.markdown(f"""
             <div class="ai-message">
-                Excellent choice! You earned <strong>{points_earned} points</strong> ⭐
+                Well analyzed. You earned <strong>{points_earned} points</strong> for this response.
                 
                 <br><br><strong>Your {chosen_style} Approach:</strong><br>
                 {style_info['description']}
                 
                 <br><br><strong>Key Strengths:</strong> {style_info['strengths']}<br>
-                <strong>Growth Area:</strong> {style_info['development']}
+                <strong>Development Area:</strong> {style_info['development']}
                 
                 <br><br><em>{scenario_data['learning_point']}</em>
             </div>
@@ -624,7 +655,7 @@ elif st.session_state.current_scenario < len(scenarios):
 
         col1, col2, col3 = st.columns([2, 2, 2])
         with col2:
-            if st.button("🚀 Continue Journey", key="next", use_container_width=True):
+            if st.button("Continue to Next Scenario", key="next", use_container_width=True):
                 st.session_state.current_scenario += 1
                 st.session_state.show_feedback = False
                 st.session_state.last_choice = None
@@ -641,25 +672,25 @@ else:
     total = len(st.session_state.responses)
     dominant_style = max(style_counts, key=style_counts.get)
     
-    st.markdown("### 🧭 Your Leadership Journey Complete!")
+    st.markdown("### Leadership Assessment Complete")
     
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     
     st.markdown(f"""
     <div class="ai-message">
-        Congratulations {st.session_state.user_name}! 🎉
+        Assessment Complete, {st.session_state.user_name}.
         
-        You've completed your leadership journey and earned <strong>{st.session_state.total_points} total points</strong>!
+        You have earned <strong>{st.session_state.total_points} total points</strong> through your responses.
         
-        <br><br><strong>Your Dominant Leadership Energy: {dominant_style}</strong><br>
+        <br><br><strong>Your Dominant Leadership Style: {dominant_style}</strong><br>
         {leadership_styles[dominant_style]['description']}
         
-        <br><br>Remember: The most effective leaders can access all four energies depending on what the situation demands. Your leadership journey has just begun! 🚀
+        <br><br>Effective leaders can access all four leadership energies depending on situational requirements. This assessment provides insight into your natural tendencies and areas for continued development.
     </div>
     """, unsafe_allow_html=True)
     
     # Detailed breakdown
-    st.markdown("### 📊 Your Leadership Energy Profile")
+    st.markdown("### Leadership Style Distribution")
     
     colors = ['red', 'blue', 'yellow', 'green']
     for i, (style, count) in enumerate(style_counts.items()):
