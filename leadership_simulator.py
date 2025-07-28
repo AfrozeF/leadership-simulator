@@ -4,22 +4,24 @@ import time
 
 st.set_page_config(page_title="Leadership Journey AI", layout="wide", initial_sidebar_state="expanded")
 
-# ---- Forest Theme Color Palette ----
+# ---- Modern Black/White/Green Color Palette ----
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         
         :root {
-            --forest-dark: #1a2e1a;
-            --forest-medium: #2d4a2d;
-            --forest-light: #4a7c59;
-            --forest-accent: #7fb069;
-            --forest-yellow: #d4a574;
-            --forest-blue: #6b9dc2;
-            --forest-red: #c85a5a;
-            --forest-bg: #f8fdf8;
-            --forest-white: #ffffff;
-            --forest-gray: #6b7280;
+            --bg-primary: #000000;
+            --bg-secondary: #333333;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --accent-primary: #00C853;
+            --accent-hover: #00A043;
+            --error-orange: #FFA000;
+            --border-light: #E0E0E0;
+            --border-medium: #9E9E9E;
+            --disabled: #9E9E9E;
+            --card-bg: #1A1A1A;
+            --surface: #2A2A2A;
         }
         
         .main .block-container {
@@ -29,34 +31,36 @@ st.markdown("""
         }
         
         .stApp {
-            background: linear-gradient(135deg, var(--forest-bg) 0%, #e8f5e8 100%);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             font-family: 'Inter', sans-serif;
         }
         
         /* Sidebar Styling */
         .css-1d391kg {
-            background: linear-gradient(180deg, var(--forest-dark) 0%, var(--forest-medium) 100%);
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
         }
         
         /* Chat Interface */
         .chat-container {
-            background: var(--forest-white);
+            background: var(--card-bg);
             border-radius: 20px;
             padding: 2rem;
             margin: 1rem 0;
-            box-shadow: 0 8px 32px rgba(26, 46, 26, 0.1);
-            border: 1px solid rgba(127, 176, 105, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 200, 83, 0.1);
+            border: 1px solid rgba(0, 200, 83, 0.2);
         }
         
         .ai-message {
-            background: linear-gradient(135deg, var(--forest-light) 0%, var(--forest-accent) 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--surface) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
             padding: 1.5rem;
             border-radius: 18px 18px 18px 4px;
             margin: 1rem 0;
             position: relative;
             font-size: 1.05rem;
             line-height: 1.6;
+            border-left: 4px solid var(--accent-primary);
         }
         
         .ai-message::before {
@@ -64,8 +68,8 @@ st.markdown("""
             position: absolute;
             top: -8px;
             left: 1rem;
-            background: var(--forest-dark);
-            color: var(--forest-accent);
+            background: var(--accent-primary);
+            color: var(--bg-primary);
             padding: 0.3rem 0.8rem;
             border-radius: 12px;
             font-size: 0.8rem;
@@ -74,18 +78,18 @@ st.markdown("""
         }
         
         .user-choice {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            color: var(--forest-dark);
+            background: var(--surface);
+            color: var(--text-primary);
             padding: 1rem 1.5rem;
             border-radius: 4px 18px 18px 18px;
             margin: 1rem 0;
-            border-left: 4px solid var(--forest-blue);
+            border-left: 4px solid var(--accent-primary);
             font-weight: 500;
         }
         
         .option-bubble {
-            background: var(--forest-white);
-            border: 2px solid rgba(127, 176, 105, 0.3);
+            background: var(--card-bg);
+            border: 2px solid var(--border-medium);
             border-radius: 16px;
             padding: 1.2rem;
             margin: 0.8rem 0;
@@ -93,12 +97,14 @@ st.markdown("""
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            color: var(--text-primary);
         }
         
         .option-bubble:hover {
-            border-color: var(--forest-accent);
+            border-color: var(--accent-primary);
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(127, 176, 105, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 200, 83, 0.2);
+            background: var(--surface);
         }
         
         .option-bubble::before {
@@ -111,16 +117,16 @@ st.markdown("""
             transition: all 0.3s ease;
         }
         
-        .red-option::before { background: var(--forest-red); }
-        .blue-option::before { background: var(--forest-blue); }
-        .yellow-option::before { background: var(--forest-yellow); }
-        .green-option::before { background: var(--forest-accent); }
+        .red-option::before { background: var(--error-orange); }
+        .blue-option::before { background: var(--accent-primary); }
+        .yellow-option::before { background: var(--error-orange); }
+        .green-option::before { background: var(--accent-primary); }
         
         .typing-indicator {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--forest-gray);
+            color: var(--text-secondary);
             font-style: italic;
             margin: 1rem 0;
         }
@@ -133,7 +139,7 @@ st.markdown("""
         .typing-dots span {
             width: 6px;
             height: 6px;
-            background: var(--forest-accent);
+            background: var(--accent-primary);
             border-radius: 50%;
             animation: typing 1.4s infinite;
         }
@@ -148,17 +154,18 @@ st.markdown("""
         
         /* Progress Components */
         .progress-card {
-            background: var(--forest-white);
+            background: var(--card-bg);
             border-radius: 16px;
             padding: 1.5rem;
             margin: 1rem 0;
-            box-shadow: 0 4px 16px rgba(26, 46, 26, 0.1);
-            border: 1px solid rgba(127, 176, 105, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 200, 83, 0.1);
+            border: 1px solid rgba(0, 200, 83, 0.2);
+            color: var(--text-primary);
         }
         
         .points-display {
-            background: linear-gradient(135deg, var(--forest-accent) 0%, var(--forest-light) 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+            color: var(--bg-primary);
             padding: 1rem;
             border-radius: 12px;
             text-align: center;
@@ -177,18 +184,19 @@ st.markdown("""
         }
         
         .scenario-completed {
-            background: var(--forest-accent);
-            color: white;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
         }
         
         .scenario-current {
-            background: var(--forest-yellow);
-            color: var(--forest-dark);
+            background: var(--error-orange);
+            color: var(--bg-primary);
         }
         
         .scenario-pending {
-            background: rgba(127, 176, 105, 0.2);
-            color: var(--forest-gray);
+            background: var(--surface);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
         }
         
         .energy-bar {
@@ -196,7 +204,7 @@ st.markdown("""
             border-radius: 4px;
             margin: 0.5rem 0;
             overflow: hidden;
-            background: rgba(127, 176, 105, 0.2);
+            background: var(--surface);
         }
         
         .energy-fill {
@@ -205,39 +213,40 @@ st.markdown("""
             transition: width 0.8s ease;
         }
         
-        .red-fill { background: linear-gradient(90deg, var(--forest-red), #e57373); }
-        .blue-fill { background: linear-gradient(90deg, var(--forest-blue), #90caf9); }
-        .yellow-fill { background: linear-gradient(90deg, var(--forest-yellow), #ffb74d); }
-        .green-fill { background: linear-gradient(90deg, var(--forest-accent), #81c784); }
+        .red-fill { background: linear-gradient(90deg, var(--error-orange), #FFB74D); }
+        .blue-fill { background: linear-gradient(90deg, var(--accent-primary), #4CAF50); }
+        .yellow-fill { background: linear-gradient(90deg, var(--error-orange), #FFD54F); }
+        .green-fill { background: linear-gradient(90deg, var(--accent-primary), #66BB6A); }
         
         /* Buttons */
         .chat-button {
-            background: linear-gradient(135deg, var(--forest-accent) 0%, var(--forest-light) 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+            color: var(--bg-primary);
             border: none;
             border-radius: 12px;
             padding: 0.8rem 1.5rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(127, 176, 105, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
             font-family: inherit;
         }
         
         .chat-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(127, 176, 105, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.4);
         }
         
         .welcome-header {
-            background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest-medium) 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
             padding: 2rem;
             border-radius: 20px;
             text-align: center;
             margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
+            border: 2px solid var(--accent-primary);
         }
         
         .welcome-header::before {
@@ -251,16 +260,50 @@ st.markdown("""
         
         /* Sidebar specific */
         .sidebar-content {
-            color: white;
+            color: var(--text-primary);
             padding: 1rem;
         }
         
         .sidebar-title {
-            color: var(--forest-accent);
+            color: var(--accent-primary);
             font-size: 1.2rem;
             font-weight: 700;
             margin-bottom: 1rem;
             text-align: center;
+        }
+        
+        /* Override Streamlit default styles */
+        .stTextInput > div > div > input {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+            border: 2px solid var(--border-medium) !important;
+            border-radius: 12px !important;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            border-color: var(--accent-primary) !important;
+            box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2) !important;
+        }
+        
+        .stButton > button {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%) !important;
+            color: var(--bg-primary) !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3) !important;
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.4) !important;
+        }
+        
+        /* Error messages */
+        .stError {
+            background-color: var(--error-orange) !important;
+            color: var(--bg-primary) !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -433,7 +476,7 @@ def render_sidebar():
                     
                     st.markdown(f"""
                     <div style="margin: 0.8rem 0;">
-                        <div style="font-size: 0.9rem; margin-bottom: 0.3rem; color: white;">
+                        <div style="font-size: 0.9rem; margin-bottom: 0.3rem; color: var(--text-primary);">
                             {style.replace(' Energy', '')} ({count})
                         </div>
                         <div class="energy-bar">
@@ -448,7 +491,7 @@ def render_sidebar():
 def show_typing_effect():
     return st.markdown("""
     <div class="typing-indicator">
-        Forest AI is thinking
+        Journey AI is thinking
         <div class="typing-dots">
             <span></span>
             <span></span>
