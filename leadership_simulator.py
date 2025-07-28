@@ -3,138 +3,136 @@ import random
 
 st.set_page_config(page_title="Leadership Simulator", layout="centered")
 
-# ---------- Styling ----------
-custom_css = """
+# Custom CSS for styling
+st.markdown("""
 <style>
-    body {
-        background-color: #f4f6f8;
-    }
-
     .main {
         font-family: 'Segoe UI', sans-serif;
-        color: #1c1e21;
+        background-color: #f8f9fa;
     }
 
     .stButton>button {
-        background-color: #1f77b4;
+        background-color: #1e3a5f;
         color: white;
         font-weight: 600;
         border-radius: 8px;
-        padding: 0.5em 1.5em;
-        transition: 0.3s ease-in-out;
+        padding: 0.6em 1.4em;
+        border: none;
+        transition: background-color 0.3s ease;
     }
 
     .stButton>button:hover {
-        background-color: #145a86;
-        color: white;
+        background-color: #162c47;
     }
 
     .scenario-box {
         background-color: #ffffff;
         border-radius: 12px;
         padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-top: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     }
 
     .feedback-box {
-        background-color: #e8f0fe;
-        border-left: 6px solid #1f77b4;
+        background-color: #edf2f7;
+        border-left: 4px solid #1e3a5f;
         padding: 16px;
-        margin-top: 20px;
         border-radius: 8px;
+        margin-top: 20px;
     }
 
-    .quadrant-box {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-
-    .quad {
-        padding: 16px;
+    .style-card {
+        border: 1px solid #d3d3d3;
+        padding: 12px;
         border-radius: 10px;
-        color: white;
-        font-weight: 600;
-        min-height: 100px;
+        background-color: #ffffff;
+        margin-bottom: 10px;
     }
 
-    .red { background-color: #d62728; }
-    .blue { background-color: #1f77b4; }
-    .green { background-color: #2ca02c; }
-    .yellow { background-color: #ff7f0e; }
+    .intro-box {
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
 </style>
-"""
+""", unsafe_allow_html=True)
 
-st.markdown(custom_css, unsafe_allow_html=True)
-
-# ---------- Leadership Color Insights ----------
-st.markdown("## 🧭 Discover Your Leadership Style")
-st.markdown("Understanding your leadership style can help you adapt your approach to lead more effectively in different situations.")
-
-st.markdown("### The 4 Colors of Leadership Energy")
-
-with st.container():
-    st.markdown("""
-<div class="quadrant-box">
-    <div class="quad red">
-        <strong>Red Energy</strong><br>
-        Competitive<br>
-        Results-Oriented<br>
-        Direct
-    </div>
-    <div class="quad yellow">
-        <strong>Yellow Energy</strong><br>
-        Expressive<br>
-        Trusting<br>
-        Sociable
-    </div>
-    <div class="quad green">
-        <strong>Green Energy</strong><br>
-        Patient<br>
-        Systematic<br>
-        Caring
-    </div>
-    <div class="quad blue">
-        <strong>Blue Energy</strong><br>
-        Analytical<br>
-        Diplomatic<br>
-        Precise
-    </div>
+# ---------- App Intro ----------
+st.markdown("## Leadership Simulation Experience")
+st.markdown("""
+<div class="intro-box">
+    <p>Welcome to the <strong>Leadership Simulator</strong> – an immersive experience designed to help you test, explore, and improve your leadership decision-making in real-world situations.</p>
+    <p>You’ll be presented with <strong>5 realistic leadership scenarios</strong> drawn from corporate, startup, and team-based settings. Each choice you make will develop certain leadership competencies.</p>
+    <p>There are no right or wrong answers — only insights to grow from. You’ll receive meaningful feedback after every decision.</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("---")
+# ---------- Leadership Styles (Collapsible) ----------
+with st.expander("See the Four Leadership Energy Styles"):
+    st.markdown("""
+    <div class="style-card"><strong>🔹 Blue Energy</strong> – Analytical, structured, data-driven</div>
+    <div class="style-card"><strong>🟢 Green Energy</strong> – Caring, empathetic, harmony-seeking</div>
+    <div class="style-card"><strong>🟠 Yellow Energy</strong> – Expressive, creative, sociable</div>
+    <div class="style-card"><strong>🔴 Red Energy</strong> – Bold, competitive, outcome-focused</div>
+    """, unsafe_allow_html=True)
 
-# ---------- Scenario Data ----------
+# ---------- Scenario Definitions ----------
 scenarios = [
     {
-        "situation": "Your team missed a key deadline due to miscommunication.",
+        "situation": "You're leading a product team at a growing fintech startup. It's Monday morning, and your senior engineer, Priya, just informed you she’s burned out and considering stepping back. She’s crucial to next week’s product demo with investors.",
         "options": {
-            "Take immediate responsibility and clarify next steps": {"Empathy": 2, "Communication": 1},
-            "Hold a team meeting to investigate what went wrong": {"Analytical Thinking": 2, "Team Awareness": 1},
-            "Privately speak with the person responsible": {"Decisiveness": 1, "Empathy": 1},
+            "Reassign her responsibilities temporarily and schedule a 1:1 to discuss her well-being": {"Empathy": 2, "Trust Building": 1},
+            "Encourage her to push through the demo and take leave after": {"Execution Focus": 2, "Short-term Gains": 1},
+            "Immediately call a team huddle and redistribute her tasks": {"Agility": 2, "Team Awareness": 1},
         }
     },
     {
-        "situation": "A team member is consistently quiet in meetings.",
+        "situation": "At Orion Consulting, you’ve just taken over as team lead. One team member, Marcus, regularly challenges your direction in meetings, which is disrupting group momentum.",
         "options": {
-            "Assign them a visible role to encourage contribution": {"Empowerment": 2, "Trust": 1},
-            "Have a private check-in to understand their hesitation": {"Empathy": 2, "Listening": 1},
-            "Continue with the current format, assuming they'll speak up when ready": {"Patience": 2},
+            "Privately meet Marcus to understand his point of view": {"Listening": 2, "Conflict Navigation": 1},
+            "Establish stronger meeting protocols and assert control": {"Authority": 2, "Decisiveness": 1},
+            "Invite Marcus to co-lead the next project phase": {"Empowerment": 2, "Influence": 1},
+        }
+    },
+    {
+        "situation": "Your marketing team is planning a campaign for a major retail client. You’re behind schedule, and two departments are blaming each other.",
+        "options": {
+            "Call a joint workshop to collaboratively address bottlenecks": {"Collaboration": 2, "Facilitation": 1},
+            "Assign clear deadlines and hold each lead accountable": {"Ownership": 2, "Structure": 1},
+            "Delay the campaign and reallocate resources next sprint": {"Risk Mitigation": 2, "Prioritization": 1},
+        }
+    },
+    {
+        "situation": "In a hybrid work setup, your team in Singapore feels disconnected from HQ in New York. Engagement is dropping.",
+        "options": {
+            "Create cross-office buddy systems and monthly check-ins": {"Culture Building": 2, "Inclusion": 1},
+            "Survey them anonymously before making any changes": {"Listening": 2, "Diagnosis": 1},
+            "Request managers to report on team morale weekly": {"Accountability": 2, "Monitoring": 1},
+        }
+    },
+    {
+        "situation": "During a client pitch, your colleague contradicts you publicly. The client looks visibly confused.",
+        "options": {
+            "Smooth over the contradiction and clarify the direction calmly": {"Composure": 2, "Client Handling": 1},
+            "Confront your colleague afterward and establish boundaries": {"Assertiveness": 2, "Team Alignment": 1},
+            "Ignore it for now and follow up later with the client privately": {"Diplomacy": 2, "Damage Control": 1},
         }
     },
 ]
 
-# ---------- App State ----------
+# ---------- State Management ----------
 if "current_scenario" not in st.session_state:
     st.session_state.current_scenario = 0
 if "score" not in st.session_state:
     st.session_state.score = {}
 
-# ---------- Scenario Display ----------
-scenario = scenarios[st.session_state.current_scenario]
-st.markdown("## 💼 Scenario")
+# ---------- Display Current Scenario ----------
+current = st.session_state.current_scenario
+scenario = scenarios[current]
+
+st.markdown(f"### Scenario {current + 1} of {len(scenarios)}")
 st.markdown(f"<div class='scenario-box'><strong>{scenario['situation']}</strong></div>", unsafe_allow_html=True)
 
 user_choice = st.radio("What would you do?", list(scenario["options"].keys()))
@@ -144,15 +142,16 @@ if st.button("Submit Response"):
     for skill, value in boosts.items():
         st.session_state.score[skill] = st.session_state.score.get(skill, 0) + value
 
-    st.markdown("### ✅ Why this matters:")
-    st.markdown("Good leadership isn’t about always being right — it’s about understanding how your actions ripple through your team.")
-
-    st.markdown("#### Leadership Competency Boosts from your choice:")
-    st.markdown(f"<div class='feedback-box'>", unsafe_allow_html=True)
-    for k, v in boosts.items():
-        st.markdown(f"**{k}**: +{v}")
+    st.markdown("#### Feedback from your choice:")
+    st.markdown("<div class='feedback-box'>", unsafe_allow_html=True)
+    for skill, pts in boosts.items():
+        st.markdown(f"- **{skill}**: +{pts}")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    if st.button("Next Scenario"):
-        st.session_state.current_scenario = (st.session_state.current_scenario + 1) % len(scenarios)
-        st.experimental_rerun()
+    if st.session_state.current_scenario < len(scenarios) - 1:
+        if st.button("Next Scenario"):
+            st.session_state.current_scenario += 1
+            st.experimental_rerun()
+    else:
+        st.markdown("### ✅ You’ve completed all scenarios!")
+        st.markdown("Thanks for participating in the Leadership Simulator.")
