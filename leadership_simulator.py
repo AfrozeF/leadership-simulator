@@ -3,7 +3,7 @@ import random
 
 st.set_page_config(page_title="Leadership Simulator", layout="centered")
 
-# Custom CSS for styling
+# ---------- Custom Styling ----------
 st.markdown("""
 <style>
     .main {
@@ -59,7 +59,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- App Intro ----------
+# ---------- Introduction ----------
 st.markdown("## Leadership Simulation Experience")
 st.markdown("""
 <div class="intro-box">
@@ -69,7 +69,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ---------- Leadership Styles (Collapsible) ----------
+# ---------- Leadership Styles Info ----------
 with st.expander("See the Four Leadership Energy Styles"):
     st.markdown("""
     <div class="style-card"><strong>🔹 Blue Energy</strong> – Analytical, structured, data-driven</div>
@@ -78,10 +78,10 @@ with st.expander("See the Four Leadership Energy Styles"):
     <div class="style-card"><strong>🔴 Red Energy</strong> – Bold, competitive, outcome-focused</div>
     """, unsafe_allow_html=True)
 
-# ---------- Scenario Definitions ----------
+# ---------- Scenarios ----------
 scenarios = [
     {
-        "situation": "You're leading a product team at a growing fintech startup. It's Monday morning, and your senior engineer, Priya, just informed you she’s burned out and considering stepping back. She’s crucial to next week’s product demo with investors.",
+        "situation": "You're leading a product team at a growing startup. It's Monday morning, and your senior engineer, Sarah, just informed you she’s burned out and considering stepping back. She’s crucial to next week’s product demo with investors.",
         "options": {
             "Reassign her responsibilities temporarily and schedule a 1:1 to discuss her well-being": {"Empathy": 2, "Trust Building": 1},
             "Encourage her to push through the demo and take leave after": {"Execution Focus": 2, "Short-term Gains": 1},
@@ -89,11 +89,11 @@ scenarios = [
         }
     },
     {
-        "situation": "At Orion Consulting, you’ve just taken over as team lead. One team member, Marcus, regularly challenges your direction in meetings, which is disrupting group momentum.",
+        "situation": "At a consulting firm, you've just taken over as team lead. One team member, Alex, regularly challenges your direction in meetings, which is disrupting group momentum.",
         "options": {
-            "Privately meet Marcus to understand his point of view": {"Listening": 2, "Conflict Navigation": 1},
+            "Privately meet Alex to understand his point of view": {"Listening": 2, "Conflict Navigation": 1},
             "Establish stronger meeting protocols and assert control": {"Authority": 2, "Decisiveness": 1},
-            "Invite Marcus to co-lead the next project phase": {"Empowerment": 2, "Influence": 1},
+            "Invite Alex to co-lead the next project phase": {"Empowerment": 2, "Influence": 1},
         }
     },
     {
@@ -105,7 +105,7 @@ scenarios = [
         }
     },
     {
-        "situation": "In a hybrid work setup, your team in Singapore feels disconnected from HQ in New York. Engagement is dropping.",
+        "situation": "In a hybrid work setup, your team in Berlin feels disconnected from HQ in New York. Engagement is dropping.",
         "options": {
             "Create cross-office buddy systems and monthly check-ins": {"Culture Building": 2, "Inclusion": 1},
             "Survey them anonymously before making any changes": {"Listening": 2, "Diagnosis": 1},
@@ -122,36 +122,47 @@ scenarios = [
     },
 ]
 
-# ---------- State Management ----------
+# ---------- Session State ----------
 if "current_scenario" not in st.session_state:
     st.session_state.current_scenario = 0
 if "score" not in st.session_state:
     st.session_state.score = {}
+if "show_feedback" not in st.session_state:
+    st.session_state.show_feedback = False
 
-# ---------- Display Current Scenario ----------
-current = st.session_state.current_scenario
-scenario = scenarios[current]
+# ---------- Scenario Logic ----------
+if st.session_state.current_scenario < len(scenarios):
+    current = st.session_state.current_scenario
+    scenario = scenarios[current]
 
-st.markdown(f"### Scenario {current + 1} of {len(scenarios)}")
-st.markdown(f"<div class='scenario-box'><strong>{scenario['situation']}</strong></div>", unsafe_allow_html=True)
+    st.markdown(f"### Scenario {current + 1} of {len(scenarios)}")
+    st.markdown(f"<div class='scenario-box'><strong>{scenario['situation']}</strong></div>", unsafe_allow_html=True)
 
-user_choice = st.radio("What would you do?", list(scenario["options"].keys()))
+    user_choice = st.radio("What would you do?", list(scenario["options"].keys()), key=f"choice_{current}")
 
-if st.button("Submit Response"):
-    boosts = scenario["options"][user_choice]
-    for skill, value in boosts.items():
-        st.session_state.score[skill] = st.session_state.score.get(skill, 0) + value
+    if st.button("Submit Response") and not st.session_state.show_feedback:
+        boosts = scenario["options"][user_choice]
+        for skill, value in boosts.items():
+            st.session_state.score[skill] = st.session_state.score.get(skill, 0) + value
+        st.session_state.show_feedback = True
 
-    st.markdown("#### Feedback from your choice:")
-    st.markdown("<div class='feedback-box'>", unsafe_allow_html=True)
-    for skill, pts in boosts.items():
-        st.markdown(f"- **{skill}**: +{pts}")
-    st.markdown("</div>", unsafe_allow_html=True)
+    if st.session_state.show_feedback:
+        st.markdown("#### Feedback from your choice:")
+        st.markdown("<div class='feedback-box'>", unsafe_allow_html=True)
+        for skill, pts in scenario["options"][user_choice].items():
+            st.markdown(f"- **{skill}**: +{pts}")
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    if st.session_state.current_scenario < len(scenarios) - 1:
         if st.button("Next Scenario"):
             st.session_state.current_scenario += 1
+            st.session_state.show_feedback = False
             st.experimental_rerun()
-    else:
-        st.markdown("### ✅ You’ve completed all scenarios!")
-        st.markdown("Thanks for participating in the Leadership Simulator.")
+else:
+    st.markdown("## ✅ You’ve completed all 5 scenarios!")
+    st.markdown("Here’s a summary of the leadership traits you developed:")
+
+    st.markdown("<div class='feedback-box'>", unsafe_allow_html=True)
+    sorted_skills = sorted(st.session_state.score.items(), key=lambda x: -x[1])
+    for skill, value in sorted_skills:
+        st.markdown(f"- **{skill}**: {value}")
+    st.markdown("</div>", unsafe_allow_html=True)
