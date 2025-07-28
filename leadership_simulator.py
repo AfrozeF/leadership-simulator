@@ -125,7 +125,7 @@ if current < len(scenarios):
 
     if st.session_state.show_feedback:
         chosen_style = scenario["options"][selected]
-        feedback_texts = {
+feedback_texts = {
     'Visionary': 'You motivate your team with purpose and long-term thinking.',
     'Democratic': 'You encourage participation and team-based decision-making.',
     'Coaching': 'You prioritize development and long-term growth.',
