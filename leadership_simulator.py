@@ -3,166 +3,157 @@ import random
 
 st.set_page_config(page_title="Leadership Simulator", layout="centered")
 
-# ---------- Custom Styling ----------
+# --- Color and Style Settings ---
+PRIMARY_COLOR = "#1B263B"   # Navy
+SECONDARY_COLOR = "#415A77" # Slate Blue
+ACCENT_COLOR = "#E0E1DD"    # Light Gray
+HOVER_COLOR = "#D6D6D6"     # Softer hover color
+FEEDBACK_BG = "#F1F1F1"     # Feedback box background
+
 st.markdown("""
-<style>
-    .main {
-        font-family: 'Segoe UI', sans-serif;
-        background-color: #f8f9fa;
-    }
-
-    .stButton>button {
-        background-color: #1e3a5f;
-        color: white;
-        font-weight: 600;
-        border-radius: 8px;
-        padding: 0.6em 1.4em;
-        border: none;
-        transition: background-color 0.3s ease;
-    }
-
-    .stButton>button:hover {
-        background-color: #162c47;
-    }
-
-    .scenario-box {
-        background-color: #ffffff;
-        border-radius: 12px;
-        padding: 20px;
-        margin-top: 20px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    }
-
-    .feedback-box {
-        background-color: #edf2f7;
-        border-left: 4px solid #1e3a5f;
-        padding: 16px;
-        border-radius: 8px;
-        margin-top: 20px;
-    }
-
-    .style-card {
-        border: 1px solid #d3d3d3;
-        padding: 12px;
-        border-radius: 10px;
-        background-color: #ffffff;
-        margin-bottom: 10px;
-    }
-
-    .intro-box {
-        background-color: #ffffff;
-        border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-        margin-bottom: 30px;
-    }
-</style>
+    <style>
+        .stButton>button {
+            background-color: """ + SECONDARY_COLOR + """;
+            color: white;
+            border-radius: 8px;
+            padding: 0.5em 1.5em;
+            transition: background-color 0.3s;
+        }
+        .stButton>button:hover {
+            background-color: """ + HOVER_COLOR + """;
+            color: black;
+        }
+        .scenario-box {
+            background-color: #EDF2F7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #ccc;
+        }
+        .feedback-box {
+            background-color: """ + FEEDBACK_BG + """;
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin-top: 15px;
+            margin-bottom: 25px;
+        }
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #1B263B;
+        }
+        .leadership-style {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .circle {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+    </style>
 """, unsafe_allow_html=True)
 
-# ---------- Introduction ----------
-st.markdown("## Leadership Simulation Experience")
+# --- Intro Header ---
+st.title("🧭 Leadership Simulator")
+
 st.markdown("""
-<div class="intro-box">
-    <p>Welcome to the <strong>Leadership Simulator</strong> – an immersive experience designed to help you test, explore, and improve your leadership decision-making in real-world situations.</p>
-    <p>You’ll be presented with <strong>5 realistic leadership scenarios</strong> drawn from corporate, startup, and team-based settings. Each choice you make will develop certain leadership competencies.</p>
-    <p>There are no right or wrong answers — only insights to grow from. You’ll receive meaningful feedback after every decision.</p>
-</div>
-""", unsafe_allow_html=True)
+Welcome to the **Leadership Simulator** – an interactive learning tool to help you strengthen your decision-making, empathy, and leadership judgment in real-world scenarios.
 
-# ---------- Leadership Styles Info ----------
-with st.expander("See the Four Leadership Energy Styles"):
-    st.markdown("""
-    <div class="style-card"><strong>🔹 Blue Energy</strong> – Analytical, structured, data-driven</div>
-    <div class="style-card"><strong>🟢 Green Energy</strong> – Caring, empathetic, harmony-seeking</div>
-    <div class="style-card"><strong>🟠 Yellow Energy</strong> – Expressive, creative, sociable</div>
-    <div class="style-card"><strong>🔴 Red Energy</strong> – Bold, competitive, outcome-focused</div>
-    """, unsafe_allow_html=True)
+You’ll face **5 realistic leadership challenges**. After each decision, you'll receive **insightful feedback** tied to a leadership style — and track how your choices align across different styles. Let’s get started!
+""")
 
-# ---------- Scenarios ----------
+# --- Leadership Styles ---
+leadership_styles = {
+    "Visionary": "#0D47A1",
+    "Democratic": "#00796B",
+    "Coaching": "#F57C00",
+    "Affiliative": "#6A1B9A",
+    "Commanding": "#C62828"
+}
+
+# --- Scenarios (add more later) ---
 scenarios = [
     {
-        "situation": "You're leading a product team at a growing startup. It's Monday morning, and your senior engineer, Sarah, just informed you she’s burned out and considering stepping back. She’s crucial to next week’s product demo with investors.",
+        "context": "You're leading a product team at a growing startup. It's Monday morning, and your senior engineer, Sarah, just informed you she’s burned out and considering stepping back. She’s crucial to next week’s product demo with investors.",
         "options": {
-            "Reassign her responsibilities temporarily and schedule a 1:1 to discuss her well-being": {"Empathy": 2, "Trust Building": 1},
-            "Encourage her to push through the demo and take leave after": {"Execution Focus": 2, "Short-term Gains": 1},
-            "Immediately call a team huddle and redistribute her tasks": {"Agility": 2, "Team Awareness": 1},
+            "Offer Sarah time off immediately and reorganize project priorities.": "Affiliative",
+            "Have a one-on-one to coach her through stress and find longer-term solutions.": "Coaching",
+            "Remind her of her responsibilities and the importance of next week’s demo.": "Commanding",
+            "Ask the team for ideas on how to redistribute work and support Sarah.": "Democratic",
+            "Motivate the team with a bold vision of how this demo could unlock funding.": "Visionary"
         }
     },
     {
-        "situation": "At a consulting firm, you've just taken over as team lead. One team member, Alex, regularly challenges your direction in meetings, which is disrupting group momentum.",
+        "context": "At a well-established marketing agency, you're promoted to lead a team that just lost two senior creatives. The team feels unstable, and project deadlines are fast approaching.",
         "options": {
-            "Privately meet Alex to understand his point of view": {"Listening": 2, "Conflict Navigation": 1},
-            "Establish stronger meeting protocols and assert control": {"Authority": 2, "Decisiveness": 1},
-            "Invite Alex to co-lead the next project phase": {"Empowerment": 2, "Influence": 1},
+            "Meet with everyone to brainstorm solutions and co-create next steps.": "Democratic",
+            "Set clear roles and responsibilities and make decisions swiftly.": "Commanding",
+            "Inspire the team with your long-term vision for revitalizing the department.": "Visionary",
+            "Pull aside your team leads to mentor and build them up for leadership.": "Coaching",
+            "Host a team retreat to rebuild morale and address burnout.": "Affiliative"
         }
     },
-    {
-        "situation": "Your marketing team is planning a campaign for a major retail client. You’re behind schedule, and two departments are blaming each other.",
-        "options": {
-            "Call a joint workshop to collaboratively address bottlenecks": {"Collaboration": 2, "Facilitation": 1},
-            "Assign clear deadlines and hold each lead accountable": {"Ownership": 2, "Structure": 1},
-            "Delay the campaign and reallocate resources next sprint": {"Risk Mitigation": 2, "Prioritization": 1},
-        }
-    },
-    {
-        "situation": "In a hybrid work setup, your team in Berlin feels disconnected from HQ in New York. Engagement is dropping.",
-        "options": {
-            "Create cross-office buddy systems and monthly check-ins": {"Culture Building": 2, "Inclusion": 1},
-            "Survey them anonymously before making any changes": {"Listening": 2, "Diagnosis": 1},
-            "Request managers to report on team morale weekly": {"Accountability": 2, "Monitoring": 1},
-        }
-    },
-    {
-        "situation": "During a client pitch, your colleague contradicts you publicly. The client looks visibly confused.",
-        "options": {
-            "Smooth over the contradiction and clarify the direction calmly": {"Composure": 2, "Client Handling": 1},
-            "Confront your colleague afterward and establish boundaries": {"Assertiveness": 2, "Team Alignment": 1},
-            "Ignore it for now and follow up later with the client privately": {"Diplomacy": 2, "Damage Control": 1},
-        }
-    },
+    # Add more scenarios here
 ]
 
-# ---------- Session State ----------
-if "current_scenario" not in st.session_state:
+# --- Session State ---
+if 'current_scenario' not in st.session_state:
     st.session_state.current_scenario = 0
-if "score" not in st.session_state:
-    st.session_state.score = {}
-if "show_feedback" not in st.session_state:
+    st.session_state.responses = []
     st.session_state.show_feedback = False
 
-# ---------- Scenario Logic ----------
-if st.session_state.current_scenario < len(scenarios):
-    current = st.session_state.current_scenario
+# --- Show Scenario ---
+current = st.session_state.current_scenario
+
+if current < len(scenarios):
     scenario = scenarios[current]
 
-    st.markdown(f"### Scenario {current + 1} of {len(scenarios)}")
-    st.markdown(f"<div class='scenario-box'><strong>{scenario['situation']}</strong></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='scenario-box'><strong>Scenario {current + 1}:</strong> {scenario['context']}</div>", unsafe_allow_html=True)
+    options = list(scenario["options"].keys())
 
-    user_choice = st.radio("What would you do?", list(scenario["options"].keys()), key=f"choice_{current}")
+    selected = st.radio("What would you do?", options)
 
-    if st.button("Submit Response") and not st.session_state.show_feedback:
-        boosts = scenario["options"][user_choice]
-        for skill, value in boosts.items():
-            st.session_state.score[skill] = st.session_state.score.get(skill, 0) + value
+    if st.button("Submit Response"):
+        st.session_state.responses.append(scenario["options"][selected])
         st.session_state.show_feedback = True
 
     if st.session_state.show_feedback:
-        st.markdown("#### Feedback from your choice:")
-        st.markdown("<div class='feedback-box'>", unsafe_allow_html=True)
-        for skill, pts in scenario["options"][user_choice].items():
-            st.markdown(f"- **{skill}**: +{pts}")
-        st.markdown("</div>", unsafe_allow_html=True)
+        chosen_style = scenario["options"][selected]
+        st.markdown(f"""
+        <div class='feedback-box'>
+            <div class='feedback-title'>Your Response Reflects: {chosen_style} Leadership</div>
+            <div>{{
+                'Visionary': 'You motivate your team with purpose and long-term thinking.',
+                'Democratic': 'You encourage participation and team-based decision-making.',
+                'Coaching': 'You prioritize development and long-term growth.',
+                'Affiliative': 'You care about emotional bonds and team morale.',
+                'Commanding': 'You take direct control and demand immediate results.'
+            }[chosen_style]}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        if st.button("Next Scenario"):
-            st.session_state.current_scenario += 1
-            st.session_state.show_feedback = False
-            st.experimental_rerun()
+    if st.session_state.show_feedback and st.button("Next Scenario"):
+        st.session_state.current_scenario += 1
+        st.session_state.show_feedback = False
+        st.rerun()
+
 else:
-    st.markdown("## ✅ You’ve completed all 5 scenarios!")
-    st.markdown("Here’s a summary of the leadership traits you developed:")
+    # --- Results Summary ---
+    st.header("🔍 Your Leadership Style Summary")
+    counts = {style: st.session_state.responses.count(style) for style in leadership_styles}
 
-    st.markdown("<div class='feedback-box'>", unsafe_allow_html=True)
-    sorted_skills = sorted(st.session_state.score.items(), key=lambda x: -x[1])
-    for skill, value in sorted_skills:
-        st.markdown(f"- **{skill}**: {value}")
-    st.markdown("</div>", unsafe_allow_html=True)
+    for style, count in counts.items():
+        st.markdown(f"""
+            <div class='leadership-style'>
+                <span class='circle' style='background-color:{leadership_styles[style]}'></span>
+                <strong>{style}</strong>: {count} scenario(s)
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.success("You’ve completed all scenarios! Use these results to reflect on your natural tendencies — and areas to grow as a leader.")
