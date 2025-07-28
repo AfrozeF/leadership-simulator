@@ -4,35 +4,69 @@ import time
 
 st.set_page_config(page_title="Leadership Journey AI", layout="wide", initial_sidebar_state="expanded")
 
-# ---- Leadership Styles Data (Renamed & Refined) ----
+# ---- Custom Colors ----
+PRIMARY_GREEN = "#28a745"  # Bootstrap success green
+GREY = "#6c757d"
+BLACK = "#000000"
+WHITE = "#ffffff"
+CARROT = "#e67e22"  # For incorrect answers
+
+st.markdown(f"""
+    <style>
+        .reportview-container {{
+            background-color: {WHITE};
+            color: {BLACK};
+        }}
+        .sidebar .sidebar-content {{
+            background-color: {GREY};
+        }}
+        .stButton>button {{
+            background-color: {PRIMARY_GREEN};
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+        }}
+        .stRadio > div {{
+            background-color: {WHITE};
+            padding: 10px;
+            border-radius: 10px;
+        }}
+    </style>
+""", unsafe_allow_html=True)
+
+# ---- Leadership Styles ----
 leadership_styles = {
-    "The Driver (decisive, action-oriented, direct)": {
+    "Reassign workload and offer time to recharge (The Stabilizer)": {
+        "style": "The Stabilizer",
+        "description": "You lead with empathy, consistency, and a calm presence.",
+        "traits": ["Patient", "Steady", "Systematic", "Good Listener", "Caring"],
+        "strengths": "Creates psychological safety, ensures cohesion, builds long-term trust.",
+        "development": "Speak up more assertively and embrace calculated risks.",
+        "points": 20
+    },
+    "Push through and focus on demo outcomes (The Driver)": {
+        "style": "The Driver",
+        "description": "You lead with urgency, clarity, and a results-first mindset.",
         "traits": ["Competitive", "Results-Oriented", "Strong-Willed", "Risk-Taker", "Direct"],
-        "description": "You lead with urgency, clarity, and focus on outcomes.",
         "strengths": "Pushes for results, tackles tough challenges, leads from the front.",
         "development": "Balance your directness with emotional awareness and collaborative input.",
         "points": 15
     },
-    "The Strategist (analytical, thoughtful, deliberate)": {
-        "traits": ["Analytical", "Diplomatic", "Precise", "Questioning", "Conventional"],
-        "description": "You approach leadership with logic, structure, and methodical decision-making.",
-        "strengths": "Excels at risk management, systems thinking, and informed decisions.",
-        "development": "Lean into intuition and act decisively when data is incomplete.",
-        "points": 12
-    },
-    "The Motivator (inspiring, energetic, persuasive)": {
-        "traits": ["Expressive", "Inspiring", "Trusting", "Talkative", "Sociable"],
+    "Engage team to support and share load (The Motivator)": {
+        "style": "The Motivator",
         "description": "You spark momentum and rally teams with passion and optimism.",
-        "strengths": "Inspires belief, energizes collaboration, drives vision.",
-        "development": "Ensure consistency and manage details with discipline.",
+        "traits": ["Expressive", "Inspiring", "Trusting", "Talkative", "Sociable"],
+        "strengths": "Energizes collaboration and drives shared vision.",
+        "development": "Stay grounded in details and execution.",
         "points": 18
     },
-    "The Stabilizer (calm, dependable, supportive)": {
-        "traits": ["Patient", "Steady", "Systematic", "Good Listener", "Caring"],
-        "description": "You lead with empathy, consistency, and a calm presence.",
-        "strengths": "Creates psychological safety, ensures cohesion, builds long-term trust.",
-        "development": "Step into discomfort, speak up more assertively, and embrace calculated risks.",
-        "points": 20
+    "Analyze priorities and rescope demo (The Strategist)": {
+        "style": "The Strategist",
+        "description": "You lead with logic, structure, and deliberate thinking.",
+        "traits": ["Analytical", "Diplomatic", "Precise", "Questioning", "Conventional"],
+        "strengths": "Excels at systems thinking and risk management.",
+        "development": "Act with more agility when uncertainty is high.",
+        "points": 12
     }
 }
 
@@ -40,38 +74,14 @@ leadership_styles = {
 educational_content = {
     "intro": {
         "title": "🧭 Welcome to Leadership Journey AI",
-        "content": "I'm your AI leadership coach, here to guide you through real workplace scenarios. Think of this as a conversation where we'll explore how different leadership tendencies show up in practice. You'll earn points based on your choices, and I'll help you understand your natural leadership approach. Ready to begin your leadership journey? 🚀"
+        "content": "I'm your AI leadership coach, here to guide you through real workplace scenarios. Think of this as a simulation to explore how your instincts play out. You'll earn points based on your choices, and we'll reveal your natural leadership profile. Ready to begin your journey? 🚀"
     },
     "scenarios": [
         {
-            "ai_intro": "🧠 **Transformational Leadership in Action**\n\nMicrosoft CEO Satya Nadella revitalized company culture by encouraging empathy and continuous learning—hallmarks of transformational leadership.",
-            "context": "You're leading a product team at a growing startup. Your senior engineer, Sarah, just informed you she's burned out and considering stepping back. She's crucial to next week's investor demo.",
-            "ai_question": "This is a critical moment that will test your leadership instincts. How do you respond to Sarah?",
-            "learning_point": "**Crisis Leadership**: Different leadership instincts shape how we handle burnout and performance stress."
-        },
-        {
-            "ai_intro": "🌐 **Servant Leadership & Remote Culture**\n\nBuffer, the fully remote company, thrives by prioritizing transparency and psychological safety.",
-            "context": "You're managing a remote marketing team. Your weekly check-ins have become quiet and unproductive, with team morale noticeably declining.",
-            "ai_question": "Virtual team dynamics require intentional leadership. What's your approach to re-energize your remote team?",
-            "learning_point": "**Remote Team Dynamics**: Leading distributed teams requires intentional connection."
-        },
-        {
-            "ai_intro": "🔁 **Adaptive Leadership in Uncertainty**\n\nCompanies like Airbnb lean into adaptive leadership during uncertainty—transparency and resilience are key.",
-            "context": "You're leading a finance team during company-wide budget cuts. One of your top performers is worried about job security.",
-            "ai_question": "During times of change, how do you help your team navigate uncertainty?",
-            "learning_point": "**Change Management**: Support and direction are vital in uncertain times."
-        },
-        {
-            "ai_intro": "🧩 **Conflict-Competent Leadership**\n\nNetflix leaders are trained to resolve tension through candid conversations and direct feedback.",
-            "context": "Two team leads are arguing publicly in a shared Slack channel. Tensions are rising.",
-            "ai_question": "Public conflicts can damage team dynamics. How do you handle it?",
-            "learning_point": "**Conflict Resolution**: Leaders can choose direct or collaborative interventions."
-        },
-        {
-            "ai_intro": "🌍 **Culturally Intelligent Leadership**\n\nGM CEO Mary Barra practices inclusive leadership by adapting communication across global teams.",
-            "context": "You're overseeing an international project. A European manager complains that the American team is too direct.",
-            "ai_question": "Cultural misunderstandings can derail projects. How do you navigate different styles?",
-            "learning_point": "**Cross-Cultural Leadership**: Bridge communication gaps to maintain trust and clarity."
+            "ai_intro": "🧠 **Transformational Leadership in Action**\n\nSatya Nadella revitalized Microsoft’s culture through empathy and learning.",
+            "context": "You're leading a startup team. Your senior engineer, Sarah, says she’s burned out a week before your investor demo.",
+            "ai_question": "What do you do next?",
+            "learning_point": "Crisis moments test your empathy, judgment, and ability to prioritize human needs alongside delivery."
         }
     ]
 }
@@ -82,39 +92,43 @@ if "current_index" not in st.session_state:
     st.session_state.scores = defaultdict(int)
     st.session_state.finished = False
     st.session_state.submitted = False
+    st.session_state.selected_option = None
 
 if st.session_state.current_index == 0:
     st.title(educational_content["intro"]["title"])
     st.markdown(educational_content["intro"]["content"])
     if st.button("Begin »"):
-        st.session_state.current_index += 1
+        st.session_state.current_index = 1
 else:
     index = st.session_state.current_index - 1
-    scenario = educational_content["scenarios"][index]
+    if index < len(educational_content["scenarios"]):
+        scenario = educational_content["scenarios"][index]
 
-    st.subheader(f"Scenario {st.session_state.current_index}: {scenario['ai_intro']}")
-    st.markdown(f"**Context:** {scenario['context']}")
-    st.markdown(f"**Challenge:** {scenario['ai_question']}")
+        st.subheader(f"Scenario {st.session_state.current_index}: {scenario['ai_intro']}")
+        st.markdown(f"**Context:** {scenario['context']}")
+        st.markdown(f"**Challenge:** {scenario['ai_question']}")
 
-    options = list(leadership_styles.keys())
-    choice = st.radio("Which leadership mindset best matches your instinct?", options)
+        choice = st.radio("Choose your course of action:", list(leadership_styles.keys()), index=0)
 
-    if not st.session_state.submitted:
-        if st.button("Submit Choice"):
-            points = leadership_styles[choice]["points"]
-            st.session_state.scores[choice] += points
+        if not st.session_state.submitted:
+            if st.button("Submit Choice"):
+                selected = leadership_styles[choice]
+                st.session_state.scores[selected["style"]] += selected["points"]
+                st.session_state.selected_option = selected
+                st.session_state.submitted = True
 
-            st.success(f"✅ You chose **{choice}**.\n\n{leadership_styles[choice]['description']}")
-            st.info(f"**Learning Point:** {scenario['learning_point']}")
-            st.session_state.submitted = True
+        if st.session_state.submitted and st.session_state.selected_option:
+            style = st.session_state.selected_option
+            st.markdown(f"<div style='background-color:{PRIMARY_GREEN}; padding:10px; border-radius:8px;'>✅ You chose: <strong>{style['style']}</strong><br/>{style['description']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background-color:{GREY}; padding:10px; border-radius:8px;'>🧠 <em>Learning Point:</em> {scenario['learning_point']}</div>", unsafe_allow_html=True)
 
-    if st.session_state.submitted:
-        if st.session_state.current_index >= len(educational_content['scenarios']):
-            st.session_state.finished = True
-        else:
             if st.button("Next Scenario »"):
                 st.session_state.current_index += 1
                 st.session_state.submitted = False
+                st.session_state.selected_option = None
+
+    else:
+        st.session_state.finished = True
 
 if st.session_state.finished:
     st.header("🎯 Your Leadership Style Summary")
@@ -122,9 +136,11 @@ if st.session_state.finished:
     sorted_styles = sorted(totals.items(), key=lambda x: x[1], reverse=True)
     top_style = sorted_styles[0][0] if sorted_styles else "Unknown"
 
-    st.subheader(f"🏆 Dominant Style: {top_style}")
-    st.markdown(f"**Traits:** {', '.join(leadership_styles[top_style]['traits'])}")
-    st.markdown(f"**Strengths:** {leadership_styles[top_style]['strengths']}")
-    st.markdown(f"**Development Tip:** {leadership_styles[top_style]['development']}")
+    summary = leadership_styles[next(k for k, v in leadership_styles.items() if v["style"] == top_style)]
+
+    st.subheader(f"🏆 Dominant Style: {summary['style']}")
+    st.markdown(f"**Traits:** {', '.join(summary['traits'])}")
+    st.markdown(f"**Strengths:** {summary['strengths']}")
+    st.markdown(f"**Development Tip:** {summary['development']}")
     st.balloons()
     st.stop()
