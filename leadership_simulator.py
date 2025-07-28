@@ -2,7 +2,7 @@ import streamlit as st
 from collections import defaultdict
 import time
 
-st.set_page_config(page_title="Forest Leadership AI", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Leadership Journey AI", layout="wide", initial_sidebar_state="expanded")
 
 # ---- Forest Theme Color Palette ----
 st.markdown("""
@@ -60,7 +60,7 @@ st.markdown("""
         }
         
         .ai-message::before {
-            content: "🌲 Forest AI";
+            content: "🧭 Journey Coach";
             position: absolute;
             top: -8px;
             left: 1rem;
@@ -241,7 +241,7 @@ st.markdown("""
         }
         
         .welcome-header::before {
-            content: '🌲🌿🌲';
+            content: '🧭🚀🌟';
             position: absolute;
             top: 1rem;
             right: 2rem;
@@ -299,12 +299,8 @@ leadership_styles = {
 
 educational_content = {
     "intro": {
-        "title": "🌲 Welcome to Forest Leadership AI",
-        "content": """I'm your AI leadership coach, here to guide you through real workplace scenarios. 
-
-Think of this as a conversation where we'll explore how different leadership energies work in practice. You'll earn points based on your choices, and I'll help you understand your natural leadership style.
-
-Ready to discover your leadership forest? 🌿"""
+        "title": "🧭 Welcome to Leadership Journey AI",
+        "content": "I'm your AI leadership coach, here to guide you through real workplace scenarios. Think of this as a conversation where we'll explore how different leadership energies work in practice. You'll earn points based on your choices, and I'll help you understand your natural leadership style. Ready to begin your leadership journey? 🚀"
     },
     "scenarios": [
         {
@@ -400,27 +396,27 @@ if 'app_started' not in st.session_state:
 def render_sidebar():
     with st.sidebar:
         st.markdown('<div class="sidebar-content">', unsafe_allow_html=True)
-        st.markdown('<h2 class="sidebar-title">🌲 Progress Forest</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="sidebar-title">🧭 Leadership Path</h2>', unsafe_allow_html=True)
         
         if st.session_state.app_started:
             # Points Display
             st.markdown(f"""
             <div class="points-display">
-                🌟 Total Points<br>
+                ⭐ Journey Points<br>
                 <span style="font-size: 1.8rem;">{st.session_state.total_points}</span>
             </div>
             """, unsafe_allow_html=True)
             
             # Scenario Progress
-            st.markdown("**Journey Progress**")
+            st.markdown("**Journey Steps**")
             for i in range(5):
                 if i < len(st.session_state.responses):
                     points = st.session_state.scenario_points[i] if i < len(st.session_state.scenario_points) else 0
-                    st.markdown(f'<div class="scenario-pill scenario-completed">Scenario {i+1} ✓ (+{points}pts)</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="scenario-pill scenario-completed">Step {i+1} ✓ (+{points}pts)</div>', unsafe_allow_html=True)
                 elif i == st.session_state.current_scenario:
-                    st.markdown(f'<div class="scenario-pill scenario-current">Scenario {i+1} 🔄</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="scenario-pill scenario-current">Step {i+1} 🔄</div>', unsafe_allow_html=True)
                 else:
-                    st.markdown(f'<div class="scenario-pill scenario-pending">Scenario {i+1}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="scenario-pill scenario-pending">Step {i+1}</div>', unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             
@@ -473,7 +469,7 @@ if not st.session_state.app_started:
     
     st.markdown(f"""
     <div class="welcome-header">
-        <h1>🌲 Forest Leadership AI</h1>
+        <h1>🧭 Leadership Journey AI</h1>
         <p style="font-size: 1.2rem; opacity: 0.9; margin: 0;">
             Your Personal AI Leadership Coach
         </p>
@@ -488,7 +484,7 @@ if not st.session_state.app_started:
     </div>
     """, unsafe_allow_html=True)
     
-    name = st.text_input("", placeholder="What's your name? Let's get started! 🌱", key="name_input")
+    name = st.text_input("", placeholder="What's your name? Let's begin your leadership journey! 🚀", key="name_input")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -510,7 +506,7 @@ elif st.session_state.current_scenario < len(scenarios):
     # Chat Header
     col1, col2 = st.columns([8, 2])
     with col1:
-        st.markdown(f"### 🌲 Forest Leadership AI - Scenario {st.session_state.current_scenario + 1}")
+        st.markdown(f"### 🧭 Leadership Journey AI - Scenario {st.session_state.current_scenario + 1}")
     with col2:
         if st.button("🔄 Restart", key="restart"):
             restart_app()
@@ -571,7 +567,7 @@ elif st.session_state.current_scenario < len(scenarios):
             
             st.markdown(f"""
             <div class="ai-message">
-                Excellent choice! You earned <strong>{points_earned} points</strong> 🌟
+                Excellent choice! You earned <strong>{points_earned} points</strong> ⭐
                 
                 <br><br><strong>Your {chosen_style} Approach:</strong><br>
                 {style_info['description']}
@@ -585,7 +581,7 @@ elif st.session_state.current_scenario < len(scenarios):
 
         col1, col2, col3 = st.columns([2, 2, 2])
         with col2:
-            if st.button("🌿 Continue Journey", key="next", use_container_width=True):
+            if st.button("🚀 Continue Journey", key="next", use_container_width=True):
                 st.session_state.current_scenario += 1
                 st.session_state.show_feedback = False
                 st.session_state.last_choice = None
@@ -602,7 +598,7 @@ else:
     total = len(st.session_state.responses)
     dominant_style = max(style_counts, key=style_counts.get)
     
-    st.markdown("### 🌲 Your Leadership Forest Journey Complete!")
+    st.markdown("### 🧭 Your Leadership Journey Complete!")
     
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     
@@ -615,7 +611,7 @@ else:
         <br><br><strong>Your Dominant Leadership Energy: {dominant_style}</strong><br>
         {leadership_styles[dominant_style]['description']}
         
-        <br><br>Remember: The most effective leaders can access all four energies depending on what the situation demands. Your journey through the Forest of Leadership has just begun! 🌿
+        <br><br>Remember: The most effective leaders can access all four energies depending on what the situation demands. Your leadership journey has just begun! 🚀
     </div>
     """, unsafe_allow_html=True)
     
