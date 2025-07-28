@@ -1,292 +1,341 @@
 import streamlit as st
 from collections import defaultdict
+import time
 
-st.set_page_config(page_title="Leadership Insights Simulator", layout="wide")
+st.set_page_config(page_title="Forest Leadership AI", layout="wide", initial_sidebar_state="expanded")
 
-# ---- Enhanced Custom CSS with proper color palette ----
+# ---- Forest Theme Color Palette ----
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --forest-dark: #1a2e1a;
+            --forest-medium: #2d4a2d;
+            --forest-light: #4a7c59;
+            --forest-accent: #7fb069;
+            --forest-yellow: #d4a574;
+            --forest-blue: #6b9dc2;
+            --forest-red: #c85a5a;
+            --forest-bg: #f8fdf8;
+            --forest-white: #ffffff;
+            --forest-gray: #6b7280;
+        }
         
         .main .block-container {
             padding-top: 1rem;
             padding-bottom: 2rem;
-            max-width: 1200px;
+            max-width: 900px;
         }
         
         .stApp {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: linear-gradient(135deg, var(--forest-bg) 0%, #e8f5e8 100%);
             font-family: 'Inter', sans-serif;
         }
         
-        .hero-section {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white;
-            padding: 3rem 2rem;
+        /* Sidebar Styling */
+        .css-1d391kg {
+            background: linear-gradient(180deg, var(--forest-dark) 0%, var(--forest-medium) 100%);
+        }
+        
+        /* Chat Interface */
+        .chat-container {
+            background: var(--forest-white);
             border-radius: 20px;
-            text-align: center;
-            margin-bottom: 2rem;
-            box-shadow: 0 20px 40px rgba(37, 99, 235, 0.2);
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 8px 32px rgba(26, 46, 26, 0.1);
+            border: 1px solid rgba(127, 176, 105, 0.2);
         }
         
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 2rem;
+        .ai-message {
+            background: linear-gradient(135deg, var(--forest-light) 0%, var(--forest-accent) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 18px 18px 18px 4px;
+            margin: 1rem 0;
+            position: relative;
+            font-size: 1.05rem;
             line-height: 1.6;
         }
         
-        .info-card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 1.5rem 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border-left: 4px solid #2563eb;
-        }
-        
-        .red-energy { border-left-color: #dc2626; }
-        .yellow-energy { border-left-color: #f59e0b; }
-        .green-energy { border-left-color: #059669; }
-        .blue-energy { border-left-color: #2563eb; }
-        
-        .progress-container {
-            background: white;
+        .ai-message::before {
+            content: "🌲 Forest AI";
+            position: absolute;
+            top: -8px;
+            left: 1rem;
+            background: var(--forest-dark);
+            color: var(--forest-accent);
+            padding: 0.3rem 0.8rem;
             border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
         }
         
-        .progress-bar {
-            background: #e5e7eb;
-            height: 8px;
-            border-radius: 4px;
+        .user-choice {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--forest-dark);
+            padding: 1rem 1.5rem;
+            border-radius: 4px 18px 18px 18px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--forest-blue);
+            font-weight: 500;
+        }
+        
+        .option-bubble {
+            background: var(--forest-white);
+            border: 2px solid rgba(127, 176, 105, 0.3);
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin: 0.8rem 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
             overflow: hidden;
         }
         
-        .progress-fill {
-            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+        .option-bubble:hover {
+            border-color: var(--forest-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(127, 176, 105, 0.2);
+        }
+        
+        .option-bubble::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
             height: 100%;
-            transition: width 0.3s ease;
+            width: 4px;
+            transition: all 0.3s ease;
         }
         
-        .scenario-container {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-        }
+        .red-option::before { background: var(--forest-red); }
+        .blue-option::before { background: var(--forest-blue); }
+        .yellow-option::before { background: var(--forest-yellow); }
+        .green-option::before { background: var(--forest-accent); }
         
-        .scenario-info {
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            border-left: 4px solid #f59e0b;
-        }
-        
-        .scenario-context {
-            background: #fafafa;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin: 1.5rem 0;
-            border: 1px solid #e5e7eb;
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--forest-gray);
             font-style: italic;
+            margin: 1rem 0;
         }
         
-        .option-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        
-        .option-card {
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            text-align: left;
-            min-height: 120px;
+        .typing-dots {
             display: flex;
-            align-items: center;
+            gap: 4px;
         }
         
-        .option-card:hover {
-            border-color: #2563eb;
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background: var(--forest-accent);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+        
+        /* Progress Components */
+        .progress-card {
+            background: var(--forest-white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 16px rgba(26, 46, 26, 0.1);
+            border: 1px solid rgba(127, 176, 105, 0.2);
+        }
+        
+        .points-display {
+            background: linear-gradient(135deg, var(--forest-accent) 0%, var(--forest-light) 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 1rem 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .scenario-pill {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            margin: 0.2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .scenario-completed {
+            background: var(--forest-accent);
+            color: white;
+        }
+        
+        .scenario-current {
+            background: var(--forest-yellow);
+            color: var(--forest-dark);
+        }
+        
+        .scenario-pending {
+            background: rgba(127, 176, 105, 0.2);
+            color: var(--forest-gray);
+        }
+        
+        .energy-bar {
+            height: 8px;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+            background: rgba(127, 176, 105, 0.2);
+        }
+        
+        .energy-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s ease;
+        }
+        
+        .red-fill { background: linear-gradient(90deg, var(--forest-red), #e57373); }
+        .blue-fill { background: linear-gradient(90deg, var(--forest-blue), #90caf9); }
+        .yellow-fill { background: linear-gradient(90deg, var(--forest-yellow), #ffb74d); }
+        .green-fill { background: linear-gradient(90deg, var(--forest-accent), #81c784); }
+        
+        /* Buttons */
+        .chat-button {
+            background: linear-gradient(135deg, var(--forest-accent) 0%, var(--forest-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(127, 176, 105, 0.3);
+            font-family: inherit;
+        }
+        
+        .chat-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 6px 20px rgba(127, 176, 105, 0.4);
         }
         
-        .red-option { border-left: 4px solid #dc2626; }
-        .yellow-option { border-left: 4px solid #f59e0b; }
-        .green-option { border-left: 4px solid #059669; }
-        .blue-option { border-left: 4px solid #2563eb; }
-        
-        .feedback-card {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        .welcome-header {
+            background: linear-gradient(135deg, var(--forest-dark) 0%, var(--forest-medium) 100%);
             color: white;
             padding: 2rem;
-            border-radius: 16px;
-            margin: 2rem 0;
-            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
-        }
-        
-        .insight-box {
-            background: rgba(255,255,255,0.1);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-top: 1rem;
-        }
-        
-        .results-container {
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-            color: white;
-            padding: 2.5rem;
-            border-radius: 16px;
-            margin: 2rem 0;
-        }
-        
-        .color-bar {
-            height: 40px;
             border-radius: 20px;
-            margin: 1rem 0;
-            display: flex;
-            align-items: center;
-            padding: 0 1.5rem;
-            font-weight: 600;
-            transition: all 0.5s ease;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
         }
         
-        .red-bar { background: linear-gradient(90deg, #dc2626, #b91c1c); }
-        .yellow-bar { background: linear-gradient(90deg, #f59e0b, #d97706); }
-        .green-bar { background: linear-gradient(90deg, #059669, #047857); }
-        .blue-bar { background: linear-gradient(90deg, #2563eb, #1d4ed8); }
+        .welcome-header::before {
+            content: '🌲🌿🌲';
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            font-size: 1.5rem;
+            opacity: 0.3;
+        }
         
-        .nav-button {
-            background: #6b7280;
+        /* Sidebar specific */
+        .sidebar-content {
             color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .nav-button:hover {
-            background: #4b5563;
-        }
-        
-        .primary-button {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-        }
-        
-        .primary-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
-        }
-        
-        .name-input {
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
             padding: 1rem;
-            font-size: 1.1rem;
-            width: 100%;
-            margin: 1rem 0;
-            transition: border-color 0.2s ease;
         }
         
-        .name-input:focus {
-            border-color: #2563eb;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .sidebar-title {
+            color: var(--forest-accent);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# ---- Leadership Data with 4-color system ----
+# ---- Enhanced Leadership Data with Points System ----
 leadership_styles = {
     "Red Energy": {
         "traits": ["Competitive", "Results-Oriented", "Strong-Willed", "Risk-Taker", "Direct"],
         "description": "You lead with intensity and drive, focusing on results and pushing boundaries",
         "strengths": "Drives performance, makes tough decisions, creates urgency, delivers results",
-        "development": "Balance directness with empathy, involve others in decision-making"
+        "development": "Balance directness with empathy, involve others in decision-making",
+        "points": 15
     },
     "Blue Energy": {
         "traits": ["Analytical", "Diplomatic", "Precise", "Questioning", "Conventional"],
         "description": "You lead through careful analysis and systematic approaches",
         "strengths": "Makes data-driven decisions, ensures quality, manages risk effectively",
-        "development": "Speed up decision-making, embrace creative solutions, trust intuition"
+        "development": "Speed up decision-making, embrace creative solutions, trust intuition",
+        "points": 12
     },
     "Yellow Energy": {
         "traits": ["Expressive", "Inspiring", "Trusting", "Talkative", "Sociable"],
         "description": "You lead by energizing others and building enthusiasm around shared goals",
         "strengths": "Motivates teams, builds relationships, drives innovation, creates positive culture",
-        "development": "Focus on follow-through, pay attention to details, balance optimism with realism"
+        "development": "Focus on follow-through, pay attention to details, balance optimism with realism",
+        "points": 18
     },
     "Green Energy": {
         "traits": ["Patient", "Steady", "Systematic", "Good Listener", "Caring"],
         "description": "You lead through stability and genuine care for your team members",
         "strengths": "Builds trust, ensures team cohesion, provides consistent support, maintains stability",
-        "development": "Embrace change more readily, make decisions faster, assert when necessary"
+        "development": "Embrace change more readily, make decisions faster, assert when necessary",
+        "points": 20
     }
 }
 
 educational_content = {
     "intro": {
-        "title": "Understanding Leadership Energy",
-        "content": """Leadership isn't one-size-fits-all. Research shows that effective leaders adapt their approach based on the situation and the people they're leading. 
+        "title": "🌲 Welcome to Forest Leadership AI",
+        "content": """I'm your AI leadership coach, here to guide you through real workplace scenarios. 
 
-The 4 Colors of Leadership Energy model helps identify your natural tendencies:
-• **Red Energy** - Direct, results-focused leadership
-• **Blue Energy** - Analytical, process-oriented leadership  
-• **Yellow Energy** - Inspirational, people-focused leadership
-• **Green Energy** - Supportive, relationship-focused leadership
+Think of this as a conversation where we'll explore how different leadership energies work in practice. You'll earn points based on your choices, and I'll help you understand your natural leadership style.
 
-Understanding your dominant style helps you leverage your strengths while developing flexibility in other approaches."""
+Ready to discover your leadership forest? 🌿"""
     },
     "scenarios": [
         {
-            "learning_point": "**Crisis Leadership**: When team members are struggling, different leadership energies respond differently. Red energy takes charge, Blue analyzes the situation, Yellow focuses on morale, and Green provides support.",
-            "context": "You're leading a product team at a growing startup. Your senior engineer, Sarah, just informed you she's burned out and considering stepping back. She's crucial to next week's investor demo."
+            "ai_intro": "Let me paint you a scenario that many leaders face. Pay attention to the dynamics at play here...",
+            "context": "You're leading a product team at a growing startup. Your senior engineer, Sarah, just informed you she's burned out and considering stepping back. She's crucial to next week's investor demo.",
+            "ai_question": "This is a critical moment that will test your leadership instincts. How do you respond to Sarah?",
+            "learning_point": "**Crisis Leadership**: When team members are struggling, different leadership energies respond differently. Red energy takes charge, Blue analyzes the situation, Yellow focuses on morale, and Green provides support."
         },
         {
-            "learning_point": "**Remote Team Dynamics**: Leading distributed teams requires intentional connection. Some leaders excel at virtual relationship-building, others at structure and process, still others at motivation and energy.",
-            "context": "You're managing a remote marketing team. Your weekly check-ins have become quiet and unproductive, with team morale noticeably declining."
+            "ai_intro": "Remote leadership brings unique challenges. Let's see how you handle this delicate situation...",
+            "context": "You're managing a remote marketing team. Your weekly check-ins have become quiet and unproductive, with team morale noticeably declining.",
+            "ai_question": "Virtual team dynamics require intentional leadership. What's your approach to re-energize your remote team?",
+            "learning_point": "**Remote Team Dynamics**: Leading distributed teams requires intentional connection. Some leaders excel at virtual relationship-building, others at structure and process, still others at motivation and energy."
         },
         {
-            "learning_point": "**Change Management**: During organizational uncertainty, team members need different types of support. Understanding how to provide both security and direction is crucial for maintaining performance.",
-            "context": "You're leading a finance team during company-wide budget cuts. One of your top performers, Michael, is worried about job security and his productivity is suffering."
+            "ai_intro": "Uncertainty tests every leader. Your response here will reveal how you handle pressure and support your team...",
+            "context": "You're leading a finance team during company-wide budget cuts. One of your top performers, Michael, is worried about job security and his productivity is suffering.",
+            "ai_question": "During times of change, people need different types of support. How do you help Michael navigate this uncertainty?",
+            "learning_point": "**Change Management**: During organizational uncertainty, team members need different types of support. Understanding how to provide both security and direction is crucial for maintaining performance."
         },
         {
-            "learning_point": "**Conflict Resolution**: When tensions arise, leaders can choose multiple approaches - from direct intervention to collaborative problem-solving. The key is matching your response to the situation.",
-            "context": "At your fast-paced design agency, deadlines are tight and tensions high. You've overheard two team leads arguing publicly in a shared Slack channel."
+            "ai_intro": "Conflict is inevitable in high-performing teams. The key is how you choose to address it...",
+            "context": "At your fast-paced design agency, deadlines are tight and tensions high. You've overheard two team leads arguing publicly in a shared Slack channel.",
+            "ai_question": "Public conflicts can damage team dynamics quickly. What's your strategy for addressing this situation?",
+            "learning_point": "**Conflict Resolution**: When tensions arise, leaders can choose multiple approaches - from direct intervention to collaborative problem-solving. The key is matching your response to the situation."
         },
         {
-            "learning_point": "**Cross-Cultural Leadership**: Global teams bring diverse communication styles and expectations. Effective leaders bridge these differences while maintaining team cohesion and productivity.",
-            "context": "You're overseeing an international project. A European manager complains that the American team is being too direct and aggressive in their communication style."
+            "ai_intro": "Global leadership requires cultural intelligence. This scenario will test your ability to bridge differences...",
+            "context": "You're overseeing an international project. A European manager complains that the American team is being too direct and aggressive in their communication style.",
+            "ai_question": "Cultural misunderstandings can derail projects. How do you navigate these different communication styles?",
+            "learning_point": "**Cross-Cultural Leadership**: Global teams bring diverse communication styles and expectations. Effective leaders bridge these differences while maintaining team cohesion and productivity."
         }
     ]
 }
@@ -340,9 +389,77 @@ if 'app_started' not in st.session_state:
     st.session_state.user_name = ""
     st.session_state.current_scenario = 0
     st.session_state.responses = []
+    st.session_state.total_points = 0
+    st.session_state.scenario_points = []
     st.session_state.show_feedback = False
     st.session_state.last_choice = None
     st.session_state.completed = False
+    st.session_state.show_typing = False
+
+# ---- Sidebar Progress Panel ----
+def render_sidebar():
+    with st.sidebar:
+        st.markdown('<div class="sidebar-content">', unsafe_allow_html=True)
+        st.markdown('<h2 class="sidebar-title">🌲 Progress Forest</h2>', unsafe_allow_html=True)
+        
+        if st.session_state.app_started:
+            # Points Display
+            st.markdown(f"""
+            <div class="points-display">
+                🌟 Total Points<br>
+                <span style="font-size: 1.8rem;">{st.session_state.total_points}</span>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Scenario Progress
+            st.markdown("**Journey Progress**")
+            for i in range(5):
+                if i < len(st.session_state.responses):
+                    points = st.session_state.scenario_points[i] if i < len(st.session_state.scenario_points) else 0
+                    st.markdown(f'<div class="scenario-pill scenario-completed">Scenario {i+1} ✓ (+{points}pts)</div>', unsafe_allow_html=True)
+                elif i == st.session_state.current_scenario:
+                    st.markdown(f'<div class="scenario-pill scenario-current">Scenario {i+1} 🔄</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<div class="scenario-pill scenario-pending">Scenario {i+1}</div>', unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Energy Distribution
+            if st.session_state.responses:
+                st.markdown("**Leadership Energy**")
+                style_counts = {style: st.session_state.responses.count(style) for style in leadership_styles.keys()}
+                total_responses = len(st.session_state.responses)
+                
+                colors = ['red', 'blue', 'yellow', 'green']
+                for i, (style, count) in enumerate(style_counts.items()):
+                    percentage = int((count / total_responses) * 100) if total_responses > 0 else 0
+                    color = colors[i]
+                    
+                    st.markdown(f"""
+                    <div style="margin: 0.8rem 0;">
+                        <div style="font-size: 0.9rem; margin-bottom: 0.3rem; color: white;">
+                            {style.replace(' Energy', '')} ({count})
+                        </div>
+                        <div class="energy-bar">
+                            <div class="{color}-fill energy-fill" style="width: {max(percentage, 5)}%;"></div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# ---- Typing Effect Function ----
+def show_typing_effect():
+    return st.markdown("""
+    <div class="typing-indicator">
+        Forest AI is thinking
+        <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ---- Navigation Functions ----
 def restart_app():
@@ -350,66 +467,32 @@ def restart_app():
         del st.session_state[key]
     st.rerun()
 
-def exit_app():
-    st.session_state.completed = True
-    st.session_state.current_scenario = len(scenarios)
-
 # ---- Welcome Screen ----
 if not st.session_state.app_started:
-    # Hero Section
+    render_sidebar()
+    
     st.markdown(f"""
-    <div class="hero-section">
-        <h1 class="hero-title">4 Colors of Leadership Insights</h1>
-        <p class="hero-subtitle">
-            Discover your natural leadership energy and learn to adapt your style for maximum impact
+    <div class="welcome-header">
+        <h1>🌲 Forest Leadership AI</h1>
+        <p style="font-size: 1.2rem; opacity: 0.9; margin: 0;">
+            Your Personal AI Leadership Coach
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Introduction Content
     st.markdown(f"""
-    <div class="info-card blue-energy">
-        <h2>{educational_content['intro']['title']}</h2>
-        <p style="line-height: 1.8; color: #374151;">{educational_content['intro']['content']}</p>
+    <div class="chat-container">
+        <div class="ai-message">
+            {educational_content['intro']['content']}
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Benefits Section
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div class="info-card red-energy">
-            <h3>Why This Matters</h3>
-            <ul style="line-height: 1.6; color: #374151;">
-                <li>Understand your natural leadership strengths</li>
-                <li>Learn when to adapt your approach</li>
-                <li>Improve team dynamics and performance</li>
-                <li>Build more effective relationships</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class="info-card yellow-energy">
-            <h3>What You'll Experience</h3>
-            <ul style="line-height: 1.6; color: #374151;">
-                <li>5 realistic workplace scenarios</li>
-                <li>Insights into your leadership energy</li>
-                <li>Personalized development recommendations</li>
-                <li>Practical application strategies</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Name Input
-    st.markdown("<br>", unsafe_allow_html=True)
-    name = st.text_input("", placeholder="Enter your name to begin your leadership journey", 
-                        key="name_input", help="We'll personalize your learning experience")
+    name = st.text_input("", placeholder="What's your name? Let's get started! 🌱", key="name_input")
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("Start Leadership Assessment", key="start_btn", use_container_width=True):
+        if st.button("🚀 Begin Leadership Journey", key="start_btn", use_container_width=True):
             if name.strip():
                 st.session_state.user_name = name.strip()
                 st.session_state.app_started = True
@@ -417,91 +500,92 @@ if not st.session_state.app_started:
             else:
                 st.error("Please enter your name to continue")
 
-# ---- Main Application ----
+# ---- Main Chat Interface ----
 elif st.session_state.current_scenario < len(scenarios):
-    # Navigation
-    col1, col2, col3 = st.columns([1, 8, 1])
-    with col1:
-        if st.button("← Restart", key="restart", help="Start over"):
-            restart_app()
-    with col3:
-        if st.button("Exit →", key="exit", help="Exit assessment"):
-            exit_app()
-    
-    # Progress
-    progress = (st.session_state.current_scenario + 1) / len(scenarios)
-    st.markdown(f"""
-    <div class="progress-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <span style="font-weight: 600; color: #374151;">Progress</span>
-            <span style="color: #6b7280;">Scenario {st.session_state.current_scenario + 1} of {len(scenarios)}</span>
-        </div>
-        <div class="progress-bar">
-            <div class="progress-fill" style="width: {progress * 100}%"></div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    render_sidebar()
     
     scenario_data = educational_content['scenarios'][st.session_state.current_scenario]
     scenario_options = scenarios[st.session_state.current_scenario]
     
-    # Greeting only for first scenario
-    greeting = f"Welcome, {st.session_state.user_name}! " if st.session_state.current_scenario == 0 else ""
+    # Chat Header
+    col1, col2 = st.columns([8, 2])
+    with col1:
+        st.markdown(f"### 🌲 Forest Leadership AI - Scenario {st.session_state.current_scenario + 1}")
+    with col2:
+        if st.button("🔄 Restart", key="restart"):
+            restart_app()
     
-    # Learning Point
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    
+    # Previous conversation if any
+    if st.session_state.current_scenario > 0:
+        st.markdown(f'<div class="user-choice">Previous choice: {st.session_state.responses[-1]}</div>', unsafe_allow_html=True)
+    
+    # AI Introduction
+    greeting = f"Hi {st.session_state.user_name}! " if st.session_state.current_scenario == 0 else ""
     st.markdown(f"""
-    <div class="scenario-info">
-        <h3>Leadership Insight</h3>
-        <p style="margin: 0; line-height: 1.6;">{greeting}{scenario_data['learning_point']}</p>
+    <div class="ai-message">
+        {greeting}{scenario_data['ai_intro']}
+        
+        <br><br><strong>The Scenario:</strong><br>
+        <em>{scenario_data['context']}</em>
+        
+        <br><br>{scenario_data['ai_question']}
     </div>
     """, unsafe_allow_html=True)
     
-    # Scenario Context
-    st.markdown(f"""
-    <div class="scenario-container">
-        <h3>Scenario {st.session_state.current_scenario + 1}</h3>
-        <div class="scenario-context">
-            {scenario_data['context']}
-        </div>
-        <p><strong>How would you respond in this situation?</strong></p>
-    """, unsafe_allow_html=True)
-    
-    # Options in 2x2 grid
-    col1, col2 = st.columns(2)
-    styles = list(scenario_options['options'].keys())
+    # Options
     colors = ['red', 'blue', 'yellow', 'green']
-    
     for i, (style, response) in enumerate(scenario_options['options'].items()):
         color = colors[i]
-        col = col1 if i < 2 else col2
         
-        with col:
-            if st.button(response, key=f"{style}_{i}", use_container_width=True, 
-                        help=f"{style} approach"):
-                st.session_state.last_choice = style
-                st.session_state.responses.append(style)
-                st.session_state.show_feedback = True
+        st.markdown(f"""
+        <div class="option-bubble {color}-option">
+            <strong>{style}</strong><br>
+            {response}
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button(f"Choose {style}", key=f"{style}_{i}", use_container_width=True):
+            # Add points and response
+            points_earned = leadership_styles[style]['points']
+            st.session_state.last_choice = style
+            st.session_state.responses.append(style)
+            st.session_state.total_points += points_earned
+            st.session_state.scenario_points.append(points_earned)
+            st.session_state.show_feedback = True
+            st.rerun()
 
     # Feedback
     if st.session_state.show_feedback and st.session_state.last_choice:
         chosen_style = st.session_state.last_choice
         style_info = leadership_styles[chosen_style]
+        points_earned = st.session_state.scenario_points[-1]
         
-        st.markdown(f"""
-        <div class="feedback-card">
-            <h3>Your Choice: {chosen_style}</h3>
-            <p style="font-size: 1.1rem; margin-bottom: 1rem;">{style_info['description']}</p>
-            <div class="insight-box">
-                <strong>Core Traits:</strong> {', '.join(style_info['traits'])}<br><br>
-                <strong>Key Strengths:</strong> {style_info['strengths']}<br><br>
-                <strong>Development Focus:</strong> {style_info['development']}
+        st.markdown(f'<div class="user-choice">You chose: {chosen_style}</div>', unsafe_allow_html=True)
+        
+        # Typing effect
+        with st.empty():
+            show_typing_effect()
+            time.sleep(2)
+            
+            st.markdown(f"""
+            <div class="ai-message">
+                Excellent choice! You earned <strong>{points_earned} points</strong> 🌟
+                
+                <br><br><strong>Your {chosen_style} Approach:</strong><br>
+                {style_info['description']}
+                
+                <br><br><strong>Key Strengths:</strong> {style_info['strengths']}<br>
+                <strong>Growth Area:</strong> {style_info['development']}
+                
+                <br><br><em>{scenario_data['learning_point']}</em>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
         col1, col2, col3 = st.columns([2, 2, 2])
         with col2:
-            if st.button("Continue", key="next", use_container_width=True):
+            if st.button("🌿 Continue Journey", key="next", use_container_width=True):
                 st.session_state.current_scenario += 1
                 st.session_state.show_feedback = False
                 st.session_state.last_choice = None
@@ -511,31 +595,32 @@ elif st.session_state.current_scenario < len(scenarios):
 
 # ---- Results Screen ----
 else:
-    col1, col2, col3 = st.columns([1, 8, 1])
-    with col1:
-        if st.button("← Start Over", key="restart_final"):
-            restart_app()
+    render_sidebar()
     
     # Calculate results
     style_counts = {style: st.session_state.responses.count(style) for style in leadership_styles.keys()}
     total = len(st.session_state.responses)
     dominant_style = max(style_counts, key=style_counts.get)
     
+    st.markdown("### 🌲 Your Leadership Forest Journey Complete!")
+    
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    
     st.markdown(f"""
-    <div class="results-container">
-        <h1 style="text-align: center; margin-bottom: 2rem;">
-            {st.session_state.user_name}'s Leadership Energy Profile
-        </h1>
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <h2 style="color: #fbbf24;">Primary Energy: {dominant_style}</h2>
-            <p style="font-size: 1.1rem; opacity: 0.9; line-height: 1.6;">
-                {leadership_styles[dominant_style]['description']}
-            </p>
-        </div>
+    <div class="ai-message">
+        Congratulations {st.session_state.user_name}! 🎉
+        
+        You've completed your leadership journey and earned <strong>{st.session_state.total_points} total points</strong>!
+        
+        <br><br><strong>Your Dominant Leadership Energy: {dominant_style}</strong><br>
+        {leadership_styles[dominant_style]['description']}
+        
+        <br><br>Remember: The most effective leaders can access all four energies depending on what the situation demands. Your journey through the Forest of Leadership has just begun! 🌿
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("### Your Leadership Energy Distribution")
+    # Detailed breakdown
+    st.markdown("### 📊 Your Leadership Energy Profile")
     
     colors = ['red', 'blue', 'yellow', 'green']
     for i, (style, count) in enumerate(style_counts.items()):
@@ -543,50 +628,20 @@ else:
         color = colors[i]
         
         st.markdown(f"""
-        <div style="margin: 1rem 0;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <div class="progress-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <strong>{style}</strong>
                 <span>{percentage}% ({count} scenarios)</span>
             </div>
-            <div class="{color}-bar" style="width: {max(percentage, 5)}%;">
-                {percentage}%
+            <div class="energy-bar">
+                <div class="{color}-fill energy-fill" style="width: {max(percentage, 5)}%;"></div>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
-    # Development Insights
-    st.markdown("### Your Development Focus")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(f"""
-        <div class="info-card green-energy">
-            <h4>Leverage Your Strengths</h4>
-            <p>{leadership_styles[dominant_style]['strengths']}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown(f"""
-        <div class="info-card yellow-energy">
-            <h4>Growth Opportunity</h4>
-            <p>{leadership_styles[dominant_style]['development']}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        if st.button("🔄 Start New Journey", key="restart_final", use_container_width=True):
+            restart_app()
     
-    # Final insights
-    least_used = min(style_counts, key=style_counts.get)
-    if style_counts[least_used] == 0:
-        st.markdown(f"""
-        <div class="info-card blue-energy">
-            <h4>Expand Your Range</h4>
-            <p>You didn't select any <strong>{least_used}</strong> responses. Consider exploring when this energy might be most effective: {leadership_styles[least_used]['description'].lower()}.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    ---
-    **Congratulations, {st.session_state.user_name}!** 
-    
-    Remember: The most effective leaders can access all four energies depending on what the situation demands. Use this assessment as a starting point for developing your leadership flexibility and impact.
-    """)
+    st.markdown('</div>', unsafe_allow_html=True)
