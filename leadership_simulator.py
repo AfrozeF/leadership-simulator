@@ -125,18 +125,22 @@ if current < len(scenarios):
 
     if st.session_state.show_feedback:
         chosen_style = scenario["options"][selected]
-        st.markdown(f"""
-        <div class='feedback-box'>
-            <div class='feedback-title'>Your Response Reflects: {chosen_style} Leadership</div>
-            <div>{{
-                'Visionary': 'You motivate your team with purpose and long-term thinking.',
-                'Democratic': 'You encourage participation and team-based decision-making.',
-                'Coaching': 'You prioritize development and long-term growth.',
-                'Affiliative': 'You care about emotional bonds and team morale.',
-                'Commanding': 'You take direct control and demand immediate results.'
-            }[chosen_style]}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        feedback_texts = {
+    'Visionary': 'You motivate your team with purpose and long-term thinking.',
+    'Democratic': 'You encourage participation and team-based decision-making.',
+    'Coaching': 'You prioritize development and long-term growth.',
+    'Affiliative': 'You care about emotional bonds and team morale.',
+    'Commanding': 'You take direct control and demand immediate results.'
+}
+
+feedback_msg = feedback_texts[chosen_style]
+
+st.markdown(f"""
+<div class='feedback-box'>
+    <div class='feedback-title'>Your Response Reflects: {chosen_style} Leadership</div>
+    <div>{feedback_msg}</div>
+</div>
+""", unsafe_allow_html=True)
 
     if st.session_state.show_feedback and st.button("Next Scenario"):
         st.session_state.current_scenario += 1
