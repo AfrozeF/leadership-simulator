@@ -1,172 +1,172 @@
 import streamlit as st
+from collections import defaultdict
 
-# --- App Config ---
-st.set_page_config(page_title="Leadership Simulator", layout="centered")
+st.set_page_config(page_title="Leadership Simulator", layout="wide")
 
-# --- App Style ---
+# ---- Custom CSS ----
 st.markdown("""
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .title {
-            font-size: 2.2em;
-            font-weight: bold;
-            color: #1F4E79;
-            margin-bottom: 0.2em;
-        }
-        .subtitle {
-            font-size: 1.2em;
-            color: #555;
+            background-color: #f7f9fc;
         }
         .scenario-card {
-            background-color: #F3F6FA;
+            background-color: #e9eef6;
             padding: 20px;
-            border-left: 6px solid #1F4E79;
-            border-radius: 10px;
-            margin-top: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            font-size: 16px;
         }
         .feedback-box {
-            background-color: #E8F0FE;
-            padding: 16px;
+            background-color: #ffffff;
+            border-left: 6px solid #4a90e2;
+            padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
-            border-left: 4px solid #1F4E79;
         }
         .feedback-title {
-            font-weight: bold;
-            color: #1F4E79;
+            font-weight: 600;
+            font-size: 18px;
             margin-bottom: 10px;
         }
-        button[kind="primary"] {
-            background-color: #1F4E79 !important;
+        .btn-style button {
+            background-color: #4a90e2;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
         }
-        button[kind="primary"]:hover {
-            background-color: #3A6EA5 !important;
-            color: white !important;
+        .btn-style button:hover {
+            background-color: #a0a0a0;
+            color: white;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# --- Leadership Styles & Feedback ---
-leadership_styles = ["Visionary", "Coaching", "Affiliative", "Democratic", "Commanding"]
-feedback_texts = {
-    "Visionary": "You’re motivated by a bigger picture and inspire others toward a common goal. This is great for innovation and growth.",
-    "Coaching": "You prioritize individual growth, helping team members develop their strengths — ideal for building long-term capability.",
-    "Affiliative": "You foster harmony and emotional bonds, which is great for morale but needs balancing with structure.",
-    "Democratic": "You value collaboration and group input, often leading to shared commitment and higher satisfaction.",
-    "Commanding": "You take quick control in crises and urgent situations. Be mindful of overuse — it can reduce morale."
-}
+# ---- Leadership Styles ----
+leadership_styles = ["Visionary", "Democratic", "Coaching", "Affiliative", "Commanding"]
 
-# --- Scenarios ---
+# ---- Scenario Data ----
 scenarios = [
     {
-        "id": 1,
-        "text": "You're leading a product team at a growing startup. It's Monday morning, and your senior engineer, Sarah, just informed you she’s burned out and considering stepping back. She’s crucial to next week’s product demo with investors.",
+        "context": "You're leading a product team at a growing startup. It's Monday morning, and your senior engineer, Sarah, just informed you she’s burned out and considering stepping back. She’s crucial to next week’s product demo with investors.",
         "options": {
-            "Visionary": "Inspire Sarah by reminding her of the bigger mission and her impact.",
-            "Coaching": "Offer Sarah a one-on-one session to understand her burnout and support her growth.",
-            "Affiliative": "Encourage Sarah to take a break and assure her the team will support her.",
-            "Democratic": "Call a team meeting to discuss redistributing her tasks collaboratively.",
-            "Commanding": "Assign her tasks regardless, emphasizing the importance of delivery."
+            "Visionary": "Inspire Sarah with the broader mission and how pivotal her role is in shaping the company's future.",
+            "Coaching": "Set up a one-on-one to understand what's behind her burnout and how to support her growth.",
+            "Affiliative": "Give Sarah some time off and reassign her tasks temporarily to show you care.",
+            "Democratic": "Bring the issue to the team to brainstorm how to support Sarah and adjust workloads.",
+            "Commanding": "Remind Sarah of her responsibilities and the importance of her delivering for the demo."
         }
     },
     {
-        "id": 2,
-        "text": "Your client presentation is tomorrow. The team is divided on the final strategy. Some are pushing for a bold move, while others prefer a conservative plan.",
+        "context": "You’re managing a remote marketing team and notice that your weekly check-ins have become quiet and unproductive. Morale seems low.",
         "options": {
-            "Visionary": "Articulate a long-term vision and persuade the team to align with it.",
-            "Coaching": "Talk individually with team members to understand their reasoning and guide growth.",
-            "Affiliative": "Ease tensions and remind the team that harmony is key.",
-            "Democratic": "Facilitate a vote or group discussion to finalize the plan.",
-            "Commanding": "Make the final decision yourself and direct the team accordingly."
+            "Visionary": "Reignite enthusiasm by reminding them of the team's larger goals.",
+            "Coaching": "Schedule individual calls to understand what each person needs to re-engage.",
+            "Affiliative": "Host a casual virtual coffee chat to rebuild emotional connections.",
+            "Democratic": "Ask the team how they'd prefer check-ins to run and implement their ideas.",
+            "Commanding": "Make participation mandatory and set expectations for each meeting."
         }
     },
     {
-        "id": 3,
-        "text": "You're the new team lead in a remote-first company. Productivity is down, and the team feels disconnected.",
+        "context": "You’re leading a finance team during budget cuts. One of your team members, Michael, is worried about job security.",
         "options": {
-            "Visionary": "Paint a compelling picture of how improved communication boosts the team’s goals.",
-            "Coaching": "Pair teammates for weekly mentorship sessions to rebuild morale.",
-            "Affiliative": "Organize virtual social events to strengthen bonds.",
-            "Democratic": "Ask the team what’s missing and how they'd like to improve.",
-            "Commanding": "Set mandatory check-ins and tighten deadlines to enforce structure."
+            "Visionary": "Reassure Michael by outlining how the team fits into the company’s strategic future.",
+            "Coaching": "Work with Michael on upskilling so he feels more secure and prepared.",
+            "Affiliative": "Acknowledge his concerns and create a supportive team environment.",
+            "Democratic": "Open a discussion on how to collectively manage the cuts.",
+            "Commanding": "Tell Michael to stay focused and not speculate."
         }
     },
     {
-        "id": 4,
-        "text": "Your junior designer, Alex, keeps missing deadlines. Their work is good, but you’re under pressure to deliver.",
+        "context": "At a fast-paced design agency, deadlines are tight and tensions high. You’ve overheard two team leads arguing in a shared channel.",
         "options": {
-            "Visionary": "Share how their work connects to the company’s success to motivate them.",
-            "Coaching": "Help Alex identify what’s blocking their efficiency and offer guidance.",
-            "Affiliative": "Reassure Alex you value their contribution and ask how to help.",
-            "Democratic": "Ask the team if they’ve faced similar issues and discuss possible solutions.",
-            "Commanding": "Issue a clear deadline and consequences if it’s missed again."
+            "Visionary": "Remind both leads of the shared vision and refocus their energy.",
+            "Coaching": "Privately coach each lead on better conflict resolution.",
+            "Affiliative": "Organize a fun offsite activity to ease tension.",
+            "Democratic": "Ask the team how conflicts should be resolved going forward.",
+            "Commanding": "Call both leads into a meeting and establish ground rules."
         }
     },
     {
-        "id": 5,
-        "text": "You’ve just joined a large corporation known for its rigid hierarchy. Your manager expects compliance, but you see opportunities for innovation.",
+        "context": "You're overseeing an international project with cultural differences causing miscommunication. A European manager complains the American team is being too direct.",
         "options": {
-            "Visionary": "Propose a long-term transformation plan to modernize workflows.",
-            "Coaching": "Quietly mentor colleagues who are open to new ways of working.",
-            "Affiliative": "Build internal relationships and earn trust before initiating change.",
-            "Democratic": "Survey the team to gauge appetite for change and build consensus.",
-            "Commanding": "Challenge the status quo directly and push for immediate changes."
+            "Visionary": "Reiterate the unified purpose and need to work across cultures.",
+            "Coaching": "Coach both parties on intercultural communication strategies.",
+            "Affiliative": "Encourage a team-building call to foster empathy.",
+            "Democratic": "Facilitate a group discussion on team norms and expectations.",
+            "Commanding": "Set strict communication protocols to avoid misunderstandings."
         }
     }
 ]
 
-# --- Session State Setup ---
-if "current_scenario" not in st.session_state:
+# ---- Feedback Texts ----
+feedback_texts = {
+    "Visionary": "You tend to lead by inspiring others and rallying them around a shared purpose.",
+    "Democratic": "You value team input and believe the best solutions come from collaboration.",
+    "Coaching": "You support others by investing in their personal and professional growth.",
+    "Affiliative": "You prioritize harmony and emotional connection in your leadership style.",
+    "Commanding": "You take control and lead with clarity and decisiveness, especially in crisis."
+}
+
+# ---- Session State Setup ----
+if 'current_scenario' not in st.session_state:
     st.session_state.current_scenario = 0
     st.session_state.responses = []
     st.session_state.show_feedback = False
-    st.session_state.chosen_style = ""
+    st.session_state.last_choice = None
 
-# --- Intro Section ---
-if st.session_state.current_scenario == 0 and not st.session_state.show_feedback and not st.session_state.responses:
-    st.markdown("<div class='title'>Leadership Scenario Simulator</div>", unsafe_allow_html=True)
-    st.markdown("<div class='subtitle'>Sharpen your leadership style through real-world challenges. Make decisions, get feedback, and understand your leadership approach.</div>", unsafe_allow_html=True)
-    st.write("You'll go through 5 realistic scenarios. For each one, pick the response that best matches what you'd do. At the end, you'll see your leadership profile.")
+# ---- App Header ----
+st.title("🧭 Leadership Simulator")
+st.markdown("""
+Welcome to the **Leadership Simulator** — a practical tool to explore how you lead in real-world workplace challenges.
 
-# --- Scenario Display ---
+You'll face **5 realistic scenarios** drawn from modern leadership challenges across industries. For each, you'll choose how to respond — and uncover which leadership style your decision reflects.
+
+""")
+
+# ---- Main Logic ----
 if st.session_state.current_scenario < len(scenarios):
     scenario = scenarios[st.session_state.current_scenario]
+    st.markdown(f"<div class='scenario-card'>{scenario['context']}</div>", unsafe_allow_html=True)
 
-    st.markdown(f"<div class='scenario-card'><strong>Scenario {scenario['id']}:</strong> {scenario['text']}</div>", unsafe_allow_html=True)
+    st.write("**Choose your response:**")
+    for style, response in scenario['options'].items():
+        if st.button(response, key=style, use_container_width=True):
+            st.session_state.last_choice = style
+            st.session_state.responses.append(style)
+            st.session_state.show_feedback = True
 
-    if not st.session_state.show_feedback:
-        st.write("**Choose your response:**")
-        for style, response in scenario["options"].items():
-            if st.button(response):
-                st.session_state.responses.append(style)
-                st.session_state.chosen_style = style
-                st.session_state.show_feedback = True
-                st.rerun()
-
-    else:
-        chosen_style = st.session_state.chosen_style
+    if st.session_state.show_feedback and st.session_state.last_choice:
+        chosen_style = st.session_state.last_choice
         feedback_msg = feedback_texts[chosen_style]
 
         st.markdown(f"""
-            <div class='feedback-box'>
-                <div class='feedback-title'>Your Response Reflects: {chosen_style} Leadership</div>
-                <div>{feedback_msg}</div>
-            </div>
+        <div class='feedback-box'>
+            <div class='feedback-title'>Your Response Reflects: {chosen_style} Leadership</div>
+            <div>{feedback_msg}</div>
+        </div>
         """, unsafe_allow_html=True)
 
-        if st.button("Next Scenario"):
+        if st.button("Next Scenario", key="next"):
             st.session_state.current_scenario += 1
             st.session_state.show_feedback = False
+            st.session_state.last_choice = None
             st.rerun()
-
-# --- Results Summary ---
-if st.session_state.current_scenario >= len(scenarios):
+else:
+    # ---- Summary Results ----
     st.header("🔍 Your Leadership Style Summary")
     counts = {style: st.session_state.responses.count(style) for style in leadership_styles}
+    total = len(st.session_state.responses)
 
-    for style, count in counts.items():
-        st.markdown(f"**{style}**: {count} scenario(s)")
+    for style in leadership_styles:
+        percent = int((counts[style] / total) * 100)
+        st.write(f"**{style}**: {counts[style]} scenario(s) ({percent}%)")
 
-    st.success("You’ve completed all scenarios! Use these results to reflect on your natural tendencies — and areas to grow as a leader.")
+    st.markdown("""
+    ---
+    ✅ **You’ve completed all scenarios!**  
+    Use these results to reflect on your natural tendencies — and areas to grow as a leader.
+
+    """)
