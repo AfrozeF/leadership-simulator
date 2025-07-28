@@ -133,16 +133,18 @@ feedback_texts = {
     'Commanding': 'You take direct control and demand immediate results.'
 }
 
-feedback_msg = feedback_texts[chosen_style]
+if st.session_state.show_feedback:
+    chosen_style = st.session_state.responses[-1]
+    feedback_msg = feedback_texts[chosen_style]
 
-st.markdown(f"""
-<div class='feedback-box'>
-    <div class='feedback-title'>Your Response Reflects: {chosen_style} Leadership</div>
-    <div>{feedback_msg}</div>
-</div>
-""", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class='feedback-box'>
+        <div class='feedback-title'>Your Response Reflects: {chosen_style} Leadership</div>
+        <div>{feedback_msg}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-if st.session_state.show_feedback and st.button("Next Scenario"):
+    if st.button("Next Scenario"):
         st.session_state.current_scenario += 1
         st.session_state.show_feedback = False
         st.rerun()
