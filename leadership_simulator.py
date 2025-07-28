@@ -6,28 +6,28 @@ st.set_page_config(page_title="Leadership Journey AI", layout="wide", initial_si
 
 # ---- Leadership Styles Data (Renamed & Refined) ----
 leadership_styles = {
-    "The Driver": {
+    "The Driver (decisive, action-oriented, direct)": {
         "traits": ["Competitive", "Results-Oriented", "Strong-Willed", "Risk-Taker", "Direct"],
         "description": "You lead with urgency, clarity, and focus on outcomes.",
         "strengths": "Pushes for results, tackles tough challenges, leads from the front.",
         "development": "Balance your directness with emotional awareness and collaborative input.",
         "points": 15
     },
-    "The Strategist": {
+    "The Strategist (analytical, thoughtful, deliberate)": {
         "traits": ["Analytical", "Diplomatic", "Precise", "Questioning", "Conventional"],
         "description": "You approach leadership with logic, structure, and methodical decision-making.",
         "strengths": "Excels at risk management, systems thinking, and informed decisions.",
         "development": "Lean into intuition and act decisively when data is incomplete.",
         "points": 12
     },
-    "The Motivator": {
+    "The Motivator (inspiring, energetic, persuasive)": {
         "traits": ["Expressive", "Inspiring", "Trusting", "Talkative", "Sociable"],
         "description": "You spark momentum and rally teams with passion and optimism.",
         "strengths": "Inspires belief, energizes collaboration, drives vision.",
         "development": "Ensure consistency and manage details with discipline.",
         "points": 18
     },
-    "The Stabilizer": {
+    "The Stabilizer (calm, dependable, supportive)": {
         "traits": ["Patient", "Steady", "Systematic", "Good Listener", "Caring"],
         "description": "You lead with empathy, consistency, and a calm presence.",
         "strengths": "Creates psychological safety, ensures cohesion, builds long-term trust.",
@@ -81,6 +81,7 @@ if "current_index" not in st.session_state:
     st.session_state.current_index = 0
     st.session_state.scores = defaultdict(int)
     st.session_state.finished = False
+    st.session_state.submitted = False
 
 if st.session_state.current_index == 0:
     st.title(educational_content["intro"]["title"])
@@ -98,18 +99,22 @@ else:
     options = list(leadership_styles.keys())
     choice = st.radio("Which leadership mindset best matches your instinct?", options)
 
-    if st.button("Submit Choice"):
-        points = leadership_styles[choice]["points"]
-        st.session_state.scores[choice] += points
+    if not st.session_state.submitted:
+        if st.button("Submit Choice"):
+            points = leadership_styles[choice]["points"]
+            st.session_state.scores[choice] += points
 
-        st.success(f"✅ You chose **{choice}**.\n\n{leadership_styles[choice]['description']}")
-        st.info(f"**Learning Point:** {scenario['learning_point']}")
+            st.success(f"✅ You chose **{choice}**.\n\n{leadership_styles[choice]['description']}")
+            st.info(f"**Learning Point:** {scenario['learning_point']}")
+            st.session_state.submitted = True
 
+    if st.session_state.submitted:
         if st.session_state.current_index >= len(educational_content['scenarios']):
             st.session_state.finished = True
         else:
-            time.sleep(1.5)
-            st.session_state.current_index += 1
+            if st.button("Next Scenario »"):
+                st.session_state.current_index += 1
+                st.session_state.submitted = False
 
 if st.session_state.finished:
     st.header("🎯 Your Leadership Style Summary")
