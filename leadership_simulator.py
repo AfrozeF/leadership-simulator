@@ -142,7 +142,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-    if st.session_state.show_feedback and st.button("Next Scenario"):
+if st.session_state.show_feedback and st.button("Next Scenario"):
         st.session_state.current_scenario += 1
         st.session_state.show_feedback = False
         st.rerun()
