@@ -2,14 +2,14 @@ import streamlit as st
 from collections import defaultdict
 import time
 
-st.set_page_config(page_title="Leadership Journey AI", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Leadership Journey AI", layout="centered", initial_sidebar_state="collapsed")
 
 # ---- Custom Colors ----
-PRIMARY_GREEN = "#28a745"  # Bootstrap success green
-GREY = "#6c757d"
-BLACK = "#000000"
-WHITE = "#ffffff"
-CARROT = "#e67e22"  # For incorrect answers
+PRIMARY_GREEN = "#2ecc71"
+GREY = "#bdc3c7"
+BLACK = "#222222"
+WHITE = "#fdfdfd"
+CARROT = "#e67e22"
 
 st.markdown(f"""
     <style>
@@ -17,14 +17,15 @@ st.markdown(f"""
             background-color: {WHITE};
             color: {BLACK};
         }}
-        .sidebar .sidebar-content {{
-            background-color: {GREY};
+        .stApp {{
+            padding: 2rem;
         }}
         .stButton>button {{
             background-color: {PRIMARY_GREEN};
             color: white;
             border-radius: 8px;
             font-weight: bold;
+            padding: 0.5rem 1.5rem;
         }}
         .stRadio > div {{
             background-color: {WHITE};
@@ -82,6 +83,18 @@ educational_content = {
             "context": "You're leading a startup team. Your senior engineer, Sarah, says she’s burned out a week before your investor demo.",
             "ai_question": "What do you do next?",
             "learning_point": "Crisis moments test your empathy, judgment, and ability to prioritize human needs alongside delivery."
+        },
+        {
+            "ai_intro": "🔍 **Delegation and Trust**\n\nHoward Schultz at Starbucks empowered his team to own operations and decisions.",
+            "context": "You're preparing for a product launch, but you're pulled into constant micro-decisions that others could own.",
+            "ai_question": "How do you handle this?",
+            "learning_point": "Great leaders know when to let go and enable autonomy without losing alignment."
+        },
+        {
+            "ai_intro": "💬 **Feedback Culture**\n\nEd Catmull of Pixar fostered a safe space for creative criticism.",
+            "context": "A team member shares an idea that misses the mark during a brainstorming session. Others stay silent.",
+            "ai_question": "How do you respond?",
+            "learning_point": "Your response to vulnerability can either build or break innovation culture."
         }
     ]
 }
@@ -95,8 +108,8 @@ if "current_index" not in st.session_state:
     st.session_state.selected_option = None
 
 if st.session_state.current_index == 0:
-    st.title(educational_content["intro"]["title"])
-    st.markdown(educational_content["intro"]["content"])
+    st.markdown(f"<h1 style='text-align: center;'>{educational_content['intro']['title']}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align: center;'>{educational_content['intro']['content']}</p>", unsafe_allow_html=True)
     if st.button("Begin »"):
         st.session_state.current_index = 1
 else:
@@ -104,7 +117,7 @@ else:
     if index < len(educational_content["scenarios"]):
         scenario = educational_content["scenarios"][index]
 
-        st.subheader(f"Scenario {st.session_state.current_index}: {scenario['ai_intro']}")
+        st.markdown(f"<h3 style='text-align: center;'>{scenario['ai_intro']}</h3>", unsafe_allow_html=True)
         st.markdown(f"**Context:** {scenario['context']}")
         st.markdown(f"**Challenge:** {scenario['ai_question']}")
 
